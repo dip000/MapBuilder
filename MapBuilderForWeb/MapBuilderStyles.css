@@ -1,0 +1,184 @@
+
+	:root{
+		/* GREEN TO YELLOW PALLETE
+  		--darker: #00703E;
+  		--dark: #1D8742;
+  		--normal-dark: #389D43;
+  		--normal: #55B441;
+  		--normal-light: #73CA3B;
+  		--light: #95E02F;
+  		--lighter: #B9F51B;
+		*/
+		
+  		--background: #1D8742;
+  		--table-shadow: #00703E;
+  		--item-hover: #55B441;
+  		--item-shadow: #00703E;
+  		--item-click: #B9F51B;
+  		--lateral-menu-background: #55B441;
+  		--side-button: #00703E;
+  		--side-button-hover: #00501E;
+  		--download-button: #95E02F;
+  		--download-button-hover: #B9F51B;
+	}
+
+
+	tr, td {
+		padding: 0.6rem;
+		border: 1px dashed lightGray;
+		background-color:white;
+		vertical-align: top;
+		cursor: pointer;
+	}
+	table {
+		border: 0px;
+		border-collapse: collapse;
+		margin:2px;
+		box-shadow: 0px 0px 15px var(--table-shadow);
+
+		font-size: 1rem;
+		font-weight: bold;
+		color: white;
+	}
+	
+	.layout{
+		background-color: var(--background);
+		padding: 5px;
+		border: 1px dashed lightGray;
+	}
+
+	body {
+		background-color: var(--background);
+		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif  !important;
+	}
+
+
+	.items .item{
+		display: inline-block;
+		padding: 5px;
+		cursor: pointer;
+		box-shadow: none;
+		border: 2px dashed #00000000;
+		border-radius: 3px;
+		transition: 0.1s ease-in-out;
+	}	
+		.item:hover {
+			border: 2px dashed var(--item-click);
+			box-shadow: 0px 0px 15px var(--item-click);
+			transform: scale(1.1);
+			transition: 0.1s ease-in-out;
+		}
+	
+	
+	.stats {
+		position: absolute;
+		left: 20px;
+		bottom: 40px;
+		color: gray;
+	}
+	
+	#lateralMenuGraphics {
+		background-color: var(--lateral-menu-background);
+		box-shadow: 0px 0px 5px var(--lateral-menu-background);
+		min-height: 410px;
+		cursor: default;
+		width: 290px;
+	}
+	#itemsArea {
+		height: 180px;
+		cursor: default;
+		overflow-x: auto;
+		max-width: 1000px;
+	
+		display: flex;
+		align-items: center;
+	}
+	
+	#GridGraphics {
+		min-width: 850px;	
+		vertical-align: center;
+		min-height: 400px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	
+	
+	
+	.addShapeButton{
+		background-color: white;
+		border-radius: 50px;
+		border: 2px dashed var(--background);
+		text-align: center;
+		padding-bottom: 9;
+		width: 50;
+		font-size: xx-large;
+		color: var(--side-button);
+		margin-left: 40px;
+		margin-right: 50px;	
+	}
+		.addShapeButton:hover{
+			background-color: var(--item-hover);
+			color: white;
+			border: 2px dashed var(--item-click);
+			box-shadow: 0px 0px 15px var(--item-click);
+			transform: scale(1.1);		
+			transition: 0.1s ease-in-out;
+			cursor: pointer;
+		}
+		.addShapeButton:active{
+			background-color: var(--item-click);
+			transition: 0.1s ease-in-out;
+		}
+	
+	
+	
+	.sideButton{
+		border: none;
+		padding: 20px;
+		margin: 10px;
+		font-size: 20px;
+		width: 270px;
+		height: 90px;
+		background-color: var(--side-button);
+		border: 2px dashed lightGray;
+		
+		font-size: 2rem;
+		font-weight: bold;
+		color: white;
+		
+		cursor: pointer;
+	}
+		.sideButton:hover {
+		  background-color: var(--side-button-hover);
+		}
+		
+		.downloadButton{
+			background-color: var(--download-button);;
+		}
+	
+		.downloadButton:hover {
+		  background-color: var(--download-button-hover);;
+		}
+		
+	.inputName {
+		border: 2px dashed lightGray;
+		padding: 19px;
+		margin-top: 10px;
+		transition: 0.1s ease-out;
+		font-weight: bolder;
+		font-size: x-large;
+		width: 211px;
+	}
+		.inputName:hover {
+			background-color: var(--item-hover);
+			color: white;
+			border: 2px dashed var(--item-click);
+			box-shadow: 0px 0px 15px var(--item-click);
+			transform: scale(1.1);		
+			transition: 0.1s ease-in-out;
+		}
+
+ /*style="transform: rotate(90deg)"*/
+
+

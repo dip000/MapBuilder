@@ -1,0 +1,332 @@
+
+<html>
+<script type="text/javascript" src="MapBuilder.js"></script>
+<script type="text/javascript" src="BuilderCalculations.js"></script>
+<script type="text/javascript" src="BuilderVisuals.js"></script>
+<script type="text/javascript" src="ShapeBuilder.js"></script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<link rel="stylesheet" type="text/css" href="MapBuilderStyles.css">
+
+    <body>
+	
+		<table>
+		<tr>
+			<td colspan="2" class="layout">
+				<div class="items" id="itemsArea"></div>
+			</td>
+		</tr>
+		<tr>
+			<td class="layout">
+				<div id='GridGraphics'></div>
+			</td>
+			<td class="layout">
+				<div id='lateralMenuGraphics'></div>
+			</td>
+		</tr>
+		
+		</table>
+	
+
+		<div id="statsGraphics"><div class='stats'><span id='topValue'></span><br><span>Item Type: </span><span id='itemType'>0</span><br><span>Rotation: </span><span id='rotation'>0</span><br><div ><span>Coordenate: </span><span id='positionX'>0</span> , <span id='positionY'>0</span></div></div></div>
+		
+    </body>
+    <script>
+		//Output elements
+		var statistics;
+        var itemType;
+        var rotation;
+        var positionX;
+        var positionY;
+        var topValue;
+		
+		//Graphic elements
+        var table;
+        var tableShapes;
+        var lateralMenu;
+		var shapeElements = [];
+		
+		//Colors
+		const itemShowcaseColor = "#1D8742";
+		const itemShadowColor = "#1D874288";
+		const itemPlacedColor = "#1D8742";
+		const clearedGridColor = "white";
+		const itemSelectedColor = "#B9F51B";
+		const itemDefaultColor = "#1D8742";
+		
+		//List Of Shapes
+		var listOfShapes = [
+			new Vector2Array([0],[0]),
+			new Vector2Array([0,0],[0,1]),
+			new Vector2Array([0,0,1],[0,1,1])
+		];
+		var listOfShapeNames = [
+			"Box",
+			"Wall",
+			"Corner Wall"
+		];
+		
+		//Keeps track on real time what's happening
+		var currentItemPlacingInfo = new ItemPlacingInfo();
+
+
+		//Everything starts here
+        window.onload = function() {
+			//Both share same stuff
+			initializeMapEditorStatistics();
+			initializeMapEditorShapes();
+
+			//Initialize Map editor
+			initializeMapEditorGrid(20, 40);
+			initializeMapEditorMenu();
+			
+			//Initialize Shapes editor
+			initializeShapesEditorGrid(10, 10);
+			initializeShapesEditorMenu();
+
+			
+			//Starts showing map editor while hidning shapes editor
+			GoToMapEditor();
+			//GoToShapesEditor();
+        }
+		
+		function initializeMapEditorGrid(x, y){
+			//Creates grid
+			let placingLcation = document.getElementById("GridGraphics");
+            table = generate_table(x, y);
+			table.id = "grid";
+			table.className = "gridMap";
+			
+			//Places grid 
+			placingLcation.appendChild(table);
+			
+			//Initializes grid logic
+			occupancyMap = Array(x).fill(null).map(()=>Array(y).fill(false));
+			
+			//Add functionality to the grid
+			var tablerowscount=table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+			for (let i=0; i<tablerowscount.length; i++) {
+				//console.log(tablerowscount[i].cells);
+				AddHoverListenerToElements(tablerowscount[i].cells);
+			}
+			
+            AddClickListenerToElement(table, OnGridClick );
+			AddListenerToScrollWheel(table);
+		}
+		
+		function initializeMapEditorMenu(){
+			//Creates HTML map editor's menu
+			lateralMenu = document.getElementById("lateralMenuGraphics");
+			lateralMenu.innerHTML = "<div class='control'><button class='sideButton downloadButton' onclick='DownloadMap()'><i class='material-icons'>download</i> Download</button><button class='sideButton' onclick='ResetMap()'><i class='material-icons'>delete</i> Reset Map</button></div>";
+			
+		}	
+		
+		function initializeMapEditorStatistics(){			
+			//save references
+			topValue = document.getElementById('topValue');
+            itemType = document.getElementById('itemType');
+            rotation = document.getElementById('rotation');
+            positionX = document.getElementById('positionX');
+            positionY = document.getElementById('positionY');
+		}
+		
+		function initializeMapEditorShapes(shapeStartIndex=0){
+			let itemsArea = document.getElementById('itemsArea');
+			
+			let fixedSizeOfShape = 6;
+			let cellSize = 1;
+			
+			for(let i=0; i<listOfShapes.length; i++){
+			
+				let maxValue = GetMaxValueOfCoordenates(listOfShapes[i]);
+				let marginValue = maxValue + 3;
+				let sizeFactor = fixedSizeOfShape / (cellSize*marginValue);
+				console.log("maxValue:"+maxValue+"; sizeFactor:"+sizeFactor);
+
+				let item = generate_table(marginValue, marginValue, 10*sizeFactor);
+				//item.style.transform = "scale("+sizeFactor+")";
+				
+				let textNode = document.createTextNode(listOfShapeNames[i]);
+				item.appendChild(textNode);
+
+				item.className = "item";
+				
+				itemsArea.appendChild( item );
+				item.addEventListener('click', function(){ ChangeItem(i); } );
+				
+				let coordenates = GlobalizeCoordenates( listOfShapes[i] , 1, 1);
+				printVisualsOfCoordenatesOnTable(coordenates, itemShowcaseColor, item);
+				
+				shapeElements[i] = item;
+			}
+			
+			let textElement = document.createElement("div");
+			let textNode = document.createTextNode("+");
+			textElement.classList.add('addShapeButton');
+			textElement.appendChild(textNode);
+			itemsArea.appendChild(textElement);
+			textElement.addEventListener('click', function(){ GoToShapesEditor(); } );
+			lastShapeElement = shapeElements[shapeStartIndex];
+			ChangeItem(shapeStartIndex);
+		}
+		
+		function initializeShapesEditorGrid(x, y){			
+			//Creates grid
+			let placingLcation = document.getElementById("GridGraphics");
+            tableShapes = generate_table(x, y);
+			tableShapes.id = "shapeMap";
+			tableShapes.className = "shapeMap";
+			
+			//Creates the shape's name input
+			let inputElement = document.createElement("input");
+			let textNode = document.createTextNode("Name: ");
+			inputElement.classList.add('inputName');
+			inputElement.id = "inputName";
+			inputElement.value = "Shape Name";
+			inputElement.append(textNode);
+			tableShapes.appendChild(inputElement);
+			
+			//Places grid 
+			placingLcation.appendChild(tableShapes);
+			
+			//Initializes grid logic
+			shapeMap = Array(x).fill(null).map(()=>Array(y).fill(false));
+			
+			//Add functionality to the grid
+			var tablerowscount=tableShapes.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+			for (let i=0; i<tablerowscount.length; i++) {
+				//console.log(tablerowscount[i].cells);
+				AddHoverListenerToElements(tablerowscount[i].cells);
+			}
+			AddClickListenerToElement(tableShapes, OnShapesGridClick);
+		}
+		
+		function initializeShapesEditorMenu(){
+			lateralMenu.innerHTML += "<div class='control'><button class='sideButton downloadButton' onclick='SaveShape()'><i class='material-icons'>save</i> Save</button><button class='sideButton' onclick='ReturnToMapEditor()'><i class='material-icons'>arrow_back_ios</i> Return</button><button class='sideButton' onclick='ResetShape()'><i class='material-icons'>delete</i> Reset Shape</button></div>";
+		}
+		
+
+		
+
+		
+///////////////////// MAIN ////////////////////////////////////////////////////
+		
+		function ResetMap(){
+			
+			let formatedCoordenates = OccupancyMapToCoordenates(occupancyMap);
+			printVisualsOfCoordenates(formatedCoordenates, clearedGridColor);
+			
+			historyOfPlacements = null;
+			historyOfPlacements = [];
+			historyIndex = 0;
+			
+			let mapLengthX = occupancyMap.length;
+			let mapLengthY = occupancyMap[0].length;
+			
+			occupancyMap = Array(mapLengthX).fill(null).map(()=>Array(mapLengthY).fill(false));
+			
+			console.log("DELETED MAP INFO:");
+			console.log(formatedCoordenates);
+		}
+		
+		function HideMapEditor(){
+			table.style.display = "none";
+			let lateralButtons = document.getElementsByClassName("control")[0];
+			lateralButtons.style.display = "none";
+		}
+
+
+        function OnGridClick(x, y){
+			//Resets Ctrl+Z actions
+			chainedUndoneIndex = 0;
+			
+			//Creates an object {[x],[y]} where x and y are integrers
+			var clickedCoordenate = new Vector2Array(x, y);
+			
+			if ( GetOccupancyOfCoordenates(clickedCoordenate) == OCCUPIED ){
+				let itemPlacingInfo = FindHistoryInfoAtCoordenates(clickedCoordenate);
+				console.log("Clicked on an item. Placing info:");
+				console.log(itemPlacingInfo);
+				DeleteFromHistoryOfPlacements(itemPlacingInfo);
+				printVisualsOfCoordenates(itemPlacingInfo.coordenates, clearedGridColor);
+				UpdateOccupancy(itemPlacingInfo.coordenates, FREE);
+			}
+			else{
+				console.log("Clicked on empty space");
+				PlaceItemAtCurrentItemInfo();
+			}
+        }
+		
+		
+		//Sooo. i know is confusing but here goes:
+		// 1. Average volume of an object is its center position. Not the bounding box center
+		// 2. Here changes the index-position for the center-volume-position of the object so it visualy rotates from its center
+		// 3. The (rows, columns) system is different from the (x, y) system by 90 degrees or (-y, x)
+		// 4. We need to register the index position as it was taken by a (x,y) system, so it changes again the index-position-row-col to index-position-xy
+		// 5. Summary; internally we're using (row,col) as original detection of coordenates. Volume-center to place the visuals. And standar (x,y) as output
+		function PlaceItemAtCurrentItemInfo(){
+			
+			let shape = listOfShapes[currentItemPlacingInfo.itemType];
+			let shapeRotated = RotateCoordenatesByAngle(shape, currentItemPlacingInfo.rotation);
+			
+			//Reformat to volume average
+			let averageVolume = AverageVolume(shapeRotated);
+			let roundedAverageVolume = { x:Math.round(averageVolume.x), y:Math.round(averageVolume.y) };
+			let volumeIndex = { x:(currentItemPlacingInfo.positionX-roundedAverageVolume.x), y:(currentItemPlacingInfo.positionY - roundedAverageVolume.y) };
+
+			//make info
+			let coordenates = GlobalizeCoordenates(shapeRotated, volumeIndex.x, volumeIndex.y);
+			currentItemPlacingInfo.coordenates = coordenates;
+			
+			//Standar (x,y) system for ouputting
+			let minValues = GetMinValuesOfCoordenates(coordenates)
+			currentItemPlacingInfo.positionX = minValues.x;
+			currentItemPlacingInfo.positionY = minValues.y;
+			
+			console.log(averageVolume);
+			console.log(roundedAverageVolume);
+			console.log(volumeIndex);
+			
+			if(GetOccupancyOfCoordenates(coordenates) == FREE){
+				console.log("CorrectPlacement");
+				printVisualsOfCoordenates(coordenates, itemPlacedColor);
+				UpdateOccupancy(coordenates, OCCUPIED);
+				RegisterHistoryOfPlacements(currentItemPlacingInfo);
+			}
+			else{
+				console.log("Incorrect Placement");
+			}
+			
+			console.log("END OF PLACEMENT");
+			console.log(coordenates);
+		}
+
+		var lastShapeElement;
+		function ChangeItem(itemIndex){
+			console.log(shapeElements);
+			currentItemPlacingInfo.itemType = itemIndex;
+			itemType.innerHTML = currentItemPlacingInfo.itemType;
+			
+			lastShapeElement.style.backgroundColor = itemDefaultColor;
+			shapeElements[itemIndex].style.backgroundColor = itemSelectedColor;
+			lastShapeElement = shapeElements[itemIndex];
+		
+			console.log("Item changed to type: " + itemIndex);
+		}
+	    
+		
+		function DownloadMap(){
+		
+			let outputData = JSON.stringify( formatCoordenates() );
+			let ouputShapes = formatShapes();
+			
+			console.log("DOWNLOADED:");
+			console.log(outputData);
+            download("WebBuilderMap"+ ".json", outputData + "$" + ouputShapes);
+        }
+/////////////////////////////////////////////////////////////////////////
+
+
+
+    </script>
+</html>
