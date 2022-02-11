@@ -4,6 +4,7 @@
 
 	var previusCoordenates;
 	let value = "646970303030";
+	var isClicking = false;
 	
 	function AddHoverListenerToElements(elements){
 		for(let i=0; i<elements.length; i++){
@@ -15,20 +16,33 @@
 				
 				positionX.innerHTML = currentItemPlacingInfo.positionX;
 				positionY.innerHTML = currentItemPlacingInfo.positionY;
-
-
+				
 				printHoverVisuals();
 				printHoverShapeVisuals();
+				
+				//If user is clicking, act hovering as clicking constantly
+				if(isClicking){
+					if(isShapeEditorActive)
+						PlaceDotAtPoint(currentItemPlacingInfo.positionX, currentItemPlacingInfo.positionY);
+					else
+						PlaceItemAtCurrentItemInfo();
+					
+					//console.log("isClicking: " + isClicking + "; isShapeEditorActive:" + isShapeEditorActive);
+				}
+				
+			
 			}, false);
 		}
 	}
 
 	function AddClickListenerToElement(element, callback){
-		element.addEventListener('click', function(e) {
-			console.log("Clicked at: " + e.target.parentElement.rowIndex + "," + e.target.cellIndex);
+		element.addEventListener('mousedown', function(e) {
+			//console.log("Clicked at: " + e.target.parentElement.rowIndex + "," + e.target.cellIndex);
 			let x = e.target.parentElement.rowIndex;
 			let y = e.target.cellIndex;
 			topValue.innerHTML = getStatisticsTopValue(value);
+			
+			isClicking = true;;
 
 			if(x == null || y == null) return;
 			callback(x, y);
@@ -45,8 +59,8 @@
 				rot = -90;
 			}
 			
-			console.log("SCROLL EVENT. rotation to: " + rot);
-			console.log(currentItemPlacingInfo);
+			//console.log("SCROLL EVENT. rotation to: " + rot);
+			//console.log(currentItemPlacingInfo);
 			currentItemPlacingInfo.rotation = (rot+currentItemPlacingInfo.rotation)%360;
 			
 			rotation.innerHTML = currentItemPlacingInfo.rotation;

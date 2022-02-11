@@ -65,6 +65,11 @@
 			"Wall",
 			"Corner Wall"
 		];
+		var listOfShapeColors = [
+			randomColor(),
+			randomColor(),
+			randomColor(),
+		];
 		
 		//Keeps track on real time what's happening
 		var currentItemPlacingInfo = new ItemPlacingInfo();
@@ -83,7 +88,10 @@
 			//Initialize Shapes editor
 			initializeShapesEditorGrid(10, 10);
 			initializeShapesEditorMenu();
-
+			
+			document.addEventListener('dragstart', (e) => {
+			  e.preventDefault()
+			})
 			
 			//Starts showing map editor while hidning shapes editor
 			GoToMapEditor();
@@ -112,6 +120,7 @@
 			
             AddClickListenerToElement(table, OnGridClick );
 			AddListenerToScrollWheel(table);
+			document.addEventListener('mouseup', function(e) { isClicking = false; });
 		}
 		
 		function initializeMapEditorMenu(){
@@ -133,29 +142,40 @@
 		function initializeMapEditorShapes(shapeStartIndex=0){
 			let itemsArea = document.getElementById('itemsArea');
 			
-			let fixedSizeOfShape = 6;
-			let cellSize = 1;
+			const fixedSizeOfShape = 6;
+			const cellSize = 0.1;
 			
 			for(let i=0; i<listOfShapes.length; i++){
+			
+				//Skip nulled shapes
+				if(listOfShapes[i] == null) continue;
 			
 				let maxValue = GetMaxValueOfCoordenates(listOfShapes[i]);
 				let marginValue = maxValue + 3;
 				let sizeFactor = fixedSizeOfShape / (cellSize*marginValue);
-				console.log("maxValue:"+maxValue+"; sizeFactor:"+sizeFactor);
+				//console.log("maxValue:"+maxValue+"; sizeFactor:"+sizeFactor);
 
-				let item = generate_table(marginValue, marginValue, 10*sizeFactor);
+				let item = generate_table(marginValue, marginValue, sizeFactor);
 				//item.style.transform = "scale("+sizeFactor+")";
 				
 				let textNode = document.createTextNode(listOfShapeNames[i]);
 				item.appendChild(textNode);
-
 				item.className = "item";
 				
+				//Delete Icon
+				let deleteIcon = document.createElement("i");
+				textNode = document.createTextNode("delete");
+				deleteIcon.className = "material-icons deleteIcon";
+				deleteIcon.appendChild(textNode);
+				item.appendChild(deleteIcon);
+				deleteIcon.addEventListener('click', function(){ DeleteShape(i); } );
+				
+				//Add functionality to item shape
 				itemsArea.appendChild( item );
 				item.addEventListener('click', function(){ ChangeItem(i); } );
 				
 				let coordenates = GlobalizeCoordenates( listOfShapes[i] , 1, 1);
-				printVisualsOfCoordenatesOnTable(coordenates, itemShowcaseColor, item);
+				printVisualsOfCoordenatesOnTable(coordenates, listOfShapeColors[i], item);
 				
 				shapeElements[i] = item;
 			}
@@ -225,8 +245,8 @@
 			
 			occupancyMap = Array(mapLengthX).fill(null).map(()=>Array(mapLengthY).fill(false));
 			
-			console.log("DELETED MAP INFO:");
-			console.log(formatedCoordenates);
+			//console.log("DELETED MAP INFO:");
+			//console.log(formatedCoordenates);
 		}
 		
 		function HideMapEditor(){
@@ -243,20 +263,23 @@
 			//Creates an object {[x],[y]} where x and y are integrers
 			var clickedCoordenate = new Vector2Array(x, y);
 			
-			if ( GetOccupancyOfCoordenates(clickedCoordenate) == OCCUPIED ){
-				let itemPlacingInfo = FindHistoryInfoAtCoordenates(clickedCoordenate);
-				console.log("Clicked on an item. Placing info:");
-				console.log(itemPlacingInfo);
-				DeleteFromHistoryOfPlacements(itemPlacingInfo);
-				printVisualsOfCoordenates(itemPlacingInfo.coordenates, clearedGridColor);
-				UpdateOccupancy(itemPlacingInfo.coordenates, FREE);
+			if ( GetOccupancyOfCoordenates(clickedCoordenate) == OCCUPIED){
+				RemoveItemAtCoordenate(clickedCoordenate);
 			}
 			else{
-				console.log("Clicked on empty space");
+				//console.log("Clicked on empty space");
 				PlaceItemAtCurrentItemInfo();
 			}
         }
 		
+		function RemoveItemAtCoordenate(clickedCoordenate){
+			let itemPlacingInfo = FindHistoryInfoAtCoordenates(clickedCoordenate);
+			//console.log("Clicked on an item. Placing info:");
+			//console.log(itemPlacingInfo);
+			DeleteFromHistoryOfPlacements(itemPlacingInfo);
+			printVisualsOfCoordenates(itemPlacingInfo.coordenates, clearedGridColor);
+			UpdateOccupancy(itemPlacingInfo.coordenates, FREE);
+		}
 		
 		//Sooo. i know is confusing but here goes:
 		// 1. Average volume of an object is its center position. Not the bounding box center
@@ -283,27 +306,32 @@
 			currentItemPlacingInfo.positionX = minValues.x;
 			currentItemPlacingInfo.positionY = minValues.y;
 			
-			console.log(averageVolume);
-			console.log(roundedAverageVolume);
-			console.log(volumeIndex);
+			//console.log(averageVolume);
+			//console.log(roundedAverageVolume);
+			//console.log(volumeIndex);
 			
 			if(GetOccupancyOfCoordenates(coordenates) == FREE){
-				console.log("CorrectPlacement");
-				printVisualsOfCoordenates(coordenates, itemPlacedColor);
+				//console.log("CorrectPlacement");
+				printVisualsOfCoordenates(coordenates, listOfShapeColors[currentItemPlacingInfo.itemType]);
 				UpdateOccupancy(coordenates, OCCUPIED);
 				RegisterHistoryOfPlacements(currentItemPlacingInfo);
 			}
 			else{
-				console.log("Incorrect Placement");
+				//console.log("Incorrect Placement");
 			}
 			
-			console.log("END OF PLACEMENT");
-			console.log(coordenates);
+			//console.log("END OF PLACEMENT");
+			//console.log(coordenates);
 		}
 
 		var lastShapeElement;
 		function ChangeItem(itemIndex){
-			console.log(shapeElements);
+			
+			if(itemIndex > listOfShapes.length-1)
+				itemIndex = listOfShapes.length-1;
+		
+			console.log("new itemIndex:" + itemIndex);
+			//console.log(shapeElements);
 			currentItemPlacingInfo.itemType = itemIndex;
 			itemType.innerHTML = currentItemPlacingInfo.itemType;
 			
@@ -311,7 +339,7 @@
 			shapeElements[itemIndex].style.backgroundColor = itemSelectedColor;
 			lastShapeElement = shapeElements[itemIndex];
 		
-			console.log("Item changed to type: " + itemIndex);
+			//console.log("Item changed to type: " + itemIndex);
 		}
 	    
 		
@@ -320,8 +348,8 @@
 			let outputData = JSON.stringify( formatCoordenates() );
 			let ouputShapes = formatShapes();
 			
-			console.log("DOWNLOADED:");
-			console.log(outputData);
+			//console.log("DOWNLOADED:");
+			//console.log(outputData);
             download("WebBuilderMap"+ ".json", outputData + "$" + ouputShapes);
         }
 /////////////////////////////////////////////////////////////////////////

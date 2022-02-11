@@ -163,6 +163,13 @@
 			return stat;
 		}
 		
+		function randomColor(){
+			return 'rgb('+random(200)+','+(random(155)+100)+','+random(200)+')';    
+		}
+		function random(number){
+			return Math.floor(Math.random()*number);;
+		}
+		
 		function AverageVolume(coordenates){
 			let average = {x:0, y:0};
 			for(let i=0; i<coordenates.x.length; i++){

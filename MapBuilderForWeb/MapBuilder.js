@@ -7,7 +7,7 @@
             else{
                 delete shapeCoordenates[x+","+y]; 
             }
-            console.log(shapeCoordenates);
+            //console.log(shapeCoordenates);
         }
 
   
@@ -19,14 +19,14 @@
 			try{
 				for(var i=0; i<coordenates.x.length; i++){
 					if(occupancyMap[coordenates.x[i]][coordenates.y[i]] == OCCUPIED){
-						console.log("Coordenates are occupied:");
-						console.log(coordenates);
+						//console.log("Coordenates are occupied:");
+						//console.log(coordenates);
 						return OCCUPIED;
 					}
 				}
 			} catch {return OCCUPIED;}
-			console.log("Coordenates are unoccupied:");
-			console.log(coordenates);
+			//console.log("Coordenates are unoccupied:");
+			//console.log(coordenates);
 			return FREE;
 		}
 		
@@ -37,8 +37,8 @@
 				occupancyMap[coordenates.x[i]][coordenates.y[i]] = OCCUPIED;
 			}
 			
-			console.log("UPDATED OCCUPANCY MAP:");
-			console.log(occupancyMap);
+			//console.log("UPDATED OCCUPANCY MAP:");
+			//console.log(occupancyMap);
 		}
 		
 		var historyOfPlacements = [];
@@ -46,22 +46,22 @@
 		function RegisterHistoryOfPlacements(itemPlacingInfo){
 			itemPlacingInfo.indexInHistory = historyIndex;
 			historyOfPlacements[historyIndex++] = new ItemPlacingInfo(itemPlacingInfo);
-			console.log("Registered in history. History:");
-			console.log(historyOfPlacements);
+			//console.log("Registered in history. History:");
+			//console.log(historyOfPlacements);
 		}
 		
 		function DeleteFromHistoryOfPlacements(itemPlacingInfo){
 			historyOfPlacements[itemPlacingInfo.indexInHistory].undoFromHistory();
-			console.log("Undone from history. History:");
-			console.log(historyOfPlacements);
+			//console.log("Undone from history. History:");
+			//console.log(historyOfPlacements);
 		}
 		
 		function UndoActionFromHistory(itemPlacingInfo){
 			if(itemPlacingInfo == null) return;
 		
 			itemPlacingInfo.deleted = ! (itemPlacingInfo.deleted);
-			console.log("Undone Last action from history. History:");
-			console.log(historyOfPlacements);
+			//console.log("Undone Last action from history. History:");
+			//console.log(historyOfPlacements);
 			
 			if(itemPlacingInfo.deleted == true){
 				return ActionTypes.deleted;
@@ -206,7 +206,7 @@
 			let test = chainedUndoneIndex + direction + historyIndex;
 			if(test > historyIndex || test < 0 ) return;	
 			chainedUndoneIndex += direction;
-			console.log("Undone direction: " + direction + "; undone index: " + chainedUndoneIndex + "; global position: " + (historyIndex + chainedUndoneIndex))
+			//console.log("Undone direction: " + direction + "; undone index: " + chainedUndoneIndex + "; global position: " + (historyIndex + chainedUndoneIndex))
 			
 			let itemPlacingInfo = GetInformationFromHistoryIndex(historyIndex + chainedUndoneIndex);
 			if(itemPlacingInfo == null) return;
@@ -249,7 +249,7 @@ function Vector2Array(x, y) {
 		this.y = [];
 	}
 	else{
-		console.error("Constructor of Vector2Array did not found an overload for input");
+		//console.error("Constructor of Vector2Array did not found an overload for input");
 	}
 }
 
