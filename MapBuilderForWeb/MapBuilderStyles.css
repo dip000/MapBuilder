@@ -154,11 +154,11 @@
 		}
 		
 		.downloadButton{
-			background-color: var(--download-button);;
+			background-color: var(--download-button);
 		}
 	
 		.downloadButton:hover {
-		  background-color: var(--download-button-hover);;
+		  background-color: var(--download-button-hover);
 		}
 		
 	.inputName {
@@ -177,6 +177,15 @@
 			box-shadow: 0px 0px 15px var(--item-click);
 			transform: scale(1.1);		
 			transition: 0.1s ease-in-out;
+		}
+		
+	.deleteIcon{
+		float: right;
+		color: white;
+	}
+		.deleteIcon:hover{
+			float: right;
+			color: #FF5555AA;
 		}
 
  /*style="transform: rotate(90deg)"*/
