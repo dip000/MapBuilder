@@ -4,6 +4,7 @@
 <script type="text/javascript" src="BuilderCalculations.js"></script>
 <script type="text/javascript" src="BuilderVisuals.js"></script>
 <script type="text/javascript" src="ShapeBuilder.js"></script>
+<script type="text/javascript" src="MultimapMechanics.js"></script>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 <link rel="stylesheet" type="text/css" href="MapBuilderStyles.css">
@@ -53,6 +54,7 @@
 		const clearedGridColor = "white";
 		const itemSelectedColor = "#B9F51B";
 		const itemDefaultColor = "#1D8742";
+		const mapCutColor = "#1D8742";
 		
 		//List Of Shapes
 		var listOfShapes = [
@@ -98,9 +100,11 @@
 			//GoToShapesEditor();
         }
 		
+
+		
 		function initializeMapEditorGrid(x, y){
 			//Creates grid
-			let placingLcation = document.getElementById("GridGraphics");
+			let placingLcation = document.getElementById("GridGraphics");			
             table = generate_table(x, y);
 			table.id = "grid";
 			table.className = "gridMap";
@@ -110,6 +114,7 @@
 			
 			//Initializes grid logic
 			occupancyMap = Array(x).fill(null).map(()=>Array(y).fill(false));
+			cutsMap = Array(x).fill(null).map(()=>Array(y).fill(false));
 			
 			//Add functionality to the grid
 			var tablerowscount=table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
@@ -245,8 +250,9 @@
 			
 			occupancyMap = Array(mapLengthX).fill(null).map(()=>Array(mapLengthY).fill(false));
 			
-			//console.log("DELETED MAP INFO:");
-			//console.log(formatedCoordenates);
+			//Reset cuts in map. See MultimapMechanics.js for more info
+			rows(nrows);
+			cols(ncols);
 		}
 		
 		function HideMapEditor(){
@@ -254,41 +260,62 @@
 			let lateralButtons = document.getElementsByClassName("control")[0];
 			lateralButtons.style.display = "none";
 		}
+		
+		
+        function OnGridClickAndDrag(x, y){
+			UpdateItemPlacingInfo(x, y);
+			state = GetOccupancyOfPlacingInfo();
 
-
+			if (state == FREE){
+				PlaceCurrentItemInfo();
+			}		
+		}
+		
         function OnGridClick(x, y){
+			//OCCUPIED happens when you click directly over a shape in the map
+			//OBSTRUCTED happens when you try to place a shape and indiretctly is being blocked by another
+			//FREE is space availabe
+			
 			//Resets Ctrl+Z actions
 			chainedUndoneIndex = 0;
 			
-			//Creates an object {[x],[y]} where x and y are integrers
-			var clickedCoordenate = new Vector2Array(x, y);
+			UpdateItemPlacingInfo(x, y);
+			state = GetOccupancyOfPlacingInfo();
 			
-			if ( GetOccupancyOfCoordenates(clickedCoordenate) == OCCUPIED){
-				RemoveItemAtCoordenate(clickedCoordenate);
+			if ( state == OUT_OF_BOUNDS){
+				//console.log("OUT_OF_BOUNDS");
+				return;
 			}
-			else{
-				//console.log("Clicked on empty space");
-				PlaceItemAtCurrentItemInfo();
+			else if (state == OCCUPIED){
+				//console.log("OCCUPIED");
+				RemoveCurrentItemInfo();
+			}
+			else if (state == OBSTRUCTED){
+				//console.log("OBSTRUCTED");
+			}
+			else if (state == MAP_CUT){
+				//console.log("MAP_CUT");
+			}
+			else if (state == FREE){
+				//console.log("FREE");
+				PlaceCurrentItemInfo();
 			}
         }
 		
-		function RemoveItemAtCoordenate(clickedCoordenate){
-			let itemPlacingInfo = FindHistoryInfoAtCoordenates(clickedCoordenate);
-			//console.log("Clicked on an item. Placing info:");
-			//console.log(itemPlacingInfo);
-			DeleteFromHistoryOfPlacements(itemPlacingInfo);
-			printVisualsOfCoordenates(itemPlacingInfo.coordenates, clearedGridColor);
-			UpdateOccupancy(itemPlacingInfo.coordenates, FREE);
-		}
-		
-		//Sooo. i know is confusing but here goes:
-		// 1. Average volume of an object is its center position. Not the bounding box center
-		// 2. Here changes the index-position for the center-volume-position of the object so it visualy rotates from its center
-		// 3. The (rows, columns) system is different from the (x, y) system by 90 degrees or (-y, x)
-		// 4. We need to register the index position as it was taken by a (x,y) system, so it changes again the index-position-row-col to index-position-xy
-		// 5. Summary; internally we're using (row,col) as original detection of coordenates. Volume-center to place the visuals. And standar (x,y) as output
-		function PlaceItemAtCurrentItemInfo(){
+		function UpdateItemPlacingInfo(x, y){
+			//Sooo. i know is confusing but here goes:
+			// 1. Average volume of an object is its center position. Not the bounding box center
+			// 2. Here changes the index-position for the center-volume-position of the object so it visualy rotates from its center
+			// 3. The (rows, columns) system is different from the (x, y) system by 90 degrees or (-y, x)
+			// 4. We need to register the index position as it was taken by a (x,y) system, so it changes again the index-position-row-col to index-position-xy
+			// 5. Summary; internally we're using (row,col) as original detection of coordenates. Volume-center to place the visuals. And standar (x,y) as output
+
+			//Creates an object {[x],[y]} where x and y are integrers
+			let clickedCoordenate = new Vector2Array(x, y);
+			currentItemPlacingInfo.positionX = x;
+			currentItemPlacingInfo.positionY = y;
 			
+			//Finds info 
 			let shape = listOfShapes[currentItemPlacingInfo.itemType];
 			let shapeRotated = RotateCoordenatesByAngle(shape, currentItemPlacingInfo.rotation);
 			
@@ -300,28 +327,26 @@
 			//make info
 			let coordenates = GlobalizeCoordenates(shapeRotated, volumeIndex.x, volumeIndex.y);
 			currentItemPlacingInfo.coordenates = coordenates;
-			
+		}
+		
+		function RemoveCurrentItemInfo(){
+			let infoToRemove = FindHistoryInfoAtCurrentPlacement();
+			DeleteFromHistoryOfPlacements(infoToRemove);
+			printVisualsOfCoordenates(infoToRemove.coordenates, clearedGridColor);
+			UpdateOccupancy(infoToRemove.coordenates, FREE);
+			printHoverVisuals();
+		}
+		
+		function PlaceCurrentItemInfo(){
 			//Standar (x,y) system for ouputting
-			let minValues = GetMinValuesOfCoordenates(coordenates)
+			let minValues = GetMinValuesOfCoordenates(currentItemPlacingInfo.coordenates)
 			currentItemPlacingInfo.positionX = minValues.x;
 			currentItemPlacingInfo.positionY = minValues.y;
 			
-			//console.log(averageVolume);
-			//console.log(roundedAverageVolume);
-			//console.log(volumeIndex);
-			
-			if(GetOccupancyOfCoordenates(coordenates) == FREE){
-				//console.log("CorrectPlacement");
-				printVisualsOfCoordenates(coordenates, listOfShapeColors[currentItemPlacingInfo.itemType]);
-				UpdateOccupancy(coordenates, OCCUPIED);
-				RegisterHistoryOfPlacements(currentItemPlacingInfo);
-			}
-			else{
-				//console.log("Incorrect Placement");
-			}
-			
-			//console.log("END OF PLACEMENT");
-			//console.log(coordenates);
+			printVisualsOfCoordenates(currentItemPlacingInfo.coordenates, listOfShapeColors[currentItemPlacingInfo.itemType]);
+			UpdateOccupancy(currentItemPlacingInfo.coordenates, OCCUPIED);
+			RegisterHistoryOfPlacements(currentItemPlacingInfo);
+		
 		}
 
 		var lastShapeElement;
@@ -330,8 +355,6 @@
 			if(itemIndex > listOfShapes.length-1)
 				itemIndex = listOfShapes.length-1;
 		
-			console.log("new itemIndex:" + itemIndex);
-			//console.log(shapeElements);
 			currentItemPlacingInfo.itemType = itemIndex;
 			itemType.innerHTML = currentItemPlacingInfo.itemType;
 			

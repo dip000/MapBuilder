@@ -24,8 +24,9 @@
 				if(isClicking){
 					if(isShapeEditorActive)
 						PlaceDotAtPoint(currentItemPlacingInfo.positionX, currentItemPlacingInfo.positionY);
-					else
-						PlaceItemAtCurrentItemInfo();
+					else{
+						OnGridClickAndDrag(currentItemPlacingInfo.positionX, currentItemPlacingInfo.positionY);
+					}
 					
 					//console.log("isClicking: " + isClicking + "; isShapeEditorActive:" + isShapeEditorActive);
 				}
@@ -120,7 +121,6 @@
 		if(shape==null) return;
 		for(var i=0; i<shape.x.length; i++){
 			var cell = table.rows[ shape.x[i] ].cells[ shape.y[i] ];
-			
 			if(cell == null) continue;
 			
 			cell.style.backgroundColor = color;	

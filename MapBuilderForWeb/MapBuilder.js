@@ -14,31 +14,49 @@
 		var occupancyMap;
 		const OCCUPIED = true;
 		const FREE = false;
-		function GetOccupancyOfCoordenates(coordenates){
+		const OUT_OF_BOUNDS = 2;
+		const OBSTRUCTED = 3;
+		const MAP_CUT = 4;
+		function GetOccupancyOfPlacingInfo(){
 			//If at least one coordenate is occupied, then return occupied
+ 			let mapLengthX = occupancyMap.length;
+			let mapLengthY = occupancyMap[0].length;
+			
+			let x = currentItemPlacingInfo.coordenates.x;
+			let y = currentItemPlacingInfo.coordenates.y;
+
 			try{
-				for(var i=0; i<coordenates.x.length; i++){
-					if(occupancyMap[coordenates.x[i]][coordenates.y[i]] == OCCUPIED){
-						//console.log("Coordenates are occupied:");
-						//console.log(coordenates);
-						return OCCUPIED;
+				let state = ( occupancyMap[ currentItemPlacingInfo.positionX ][ currentItemPlacingInfo.positionY ] );
+				
+				if( state == null){
+					return MAP_CUT;
+				}
+				if( state == OCCUPIED){
+					return OCCUPIED;
+				}
+
+				for(var i=0; i<x.length; i++){
+					state = occupancyMap[ x[i] ][ y[i] ];
+					
+					if(state == null){
+						return OUT_OF_BOUNDS;
+					}
+					
+					if(state == OCCUPIED){
+						return OBSTRUCTED;
 					}
 				}
-			} catch {return OCCUPIED;}
-			//console.log("Coordenates are unoccupied:");
-			//console.log(coordenates);
+			} catch {return OUT_OF_BOUNDS;}
+
 			return FREE;
 		}
 		
 
 		
-		function UpdateOccupancy(coordenates, OCCUPIED){
-            for(var i=0; i<coordenates.x.length; i++){
-				occupancyMap[coordenates.x[i]][coordenates.y[i]] = OCCUPIED;
-			}
-			
-			//console.log("UPDATED OCCUPANCY MAP:");
-			//console.log(occupancyMap);
+		function UpdateOccupancy(coordenates, state){
+			for(var i=0; i<coordenates.x.length; i++){
+				occupancyMap[coordenates.x[i]][coordenates.y[i]] = state;
+			}		
 		}
 		
 		var historyOfPlacements = [];
@@ -46,22 +64,16 @@
 		function RegisterHistoryOfPlacements(itemPlacingInfo){
 			itemPlacingInfo.indexInHistory = historyIndex;
 			historyOfPlacements[historyIndex++] = new ItemPlacingInfo(itemPlacingInfo);
-			//console.log("Registered in history. History:");
-			//console.log(historyOfPlacements);
 		}
 		
 		function DeleteFromHistoryOfPlacements(itemPlacingInfo){
 			historyOfPlacements[itemPlacingInfo.indexInHistory].undoFromHistory();
-			//console.log("Undone from history. History:");
-			//console.log(historyOfPlacements);
 		}
 		
 		function UndoActionFromHistory(itemPlacingInfo){
 			if(itemPlacingInfo == null) return;
 		
 			itemPlacingInfo.deleted = ! (itemPlacingInfo.deleted);
-			//console.log("Undone Last action from history. History:");
-			//console.log(historyOfPlacements);
 			
 			if(itemPlacingInfo.deleted == true){
 				return ActionTypes.deleted;
@@ -78,19 +90,18 @@
 		}
 		
 		
-		function FindHistoryInfoAtCoordenates(coordenate){
+		function FindHistoryInfoAtCurrentPlacement(){
 			for(var i=0; i<historyOfPlacements.length; i++){
 			
 				//Skip the search if it was marked as deleted
 				if(historyOfPlacements[i].deleted == true){
 					continue;
 				}
-				
 				let historyCoordenates = historyOfPlacements[i].coordenates;
 				
 				for(var j=0; j<historyCoordenates.x.length; j++){
-					let sameCoordenateX = (historyCoordenates.x[j] == coordenate.x[0]);
-					let sameCoordenateY = (historyCoordenates.y[j] == coordenate.y[0]);
+					let sameCoordenateX = (historyCoordenates.x[j] == currentItemPlacingInfo.positionX);
+					let sameCoordenateY = (historyCoordenates.y[j] == currentItemPlacingInfo.positionY);
 					
 					if(sameCoordenateX && sameCoordenateY){
 						return historyOfPlacements[i];
