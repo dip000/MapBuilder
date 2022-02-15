@@ -111,6 +111,28 @@
 
 			return null;
 		}
+		
+		function FindHistoryInfoAtPoint(point){
+			for(var i=0; i<historyOfPlacements.length; i++){
+			
+				//Skip the search if it was marked as deleted
+				if(historyOfPlacements[i].deleted == true){
+					continue;
+				}
+				let historyCoordenates = historyOfPlacements[i].coordenates;
+				
+				for(var j=0; j<historyCoordenates.x.length; j++){
+					let sameCoordenateX = (historyCoordenates.x[j] == point.x);
+					let sameCoordenateY = (historyCoordenates.y[j] == point.y);
+					
+					if(sameCoordenateX && sameCoordenateY){
+						return historyOfPlacements[i];
+					}
+				}
+			}
+
+			return null;
+		}
 
 
 
@@ -310,6 +332,7 @@ function OutputData(){
 	this.positionsY;
 	this.mapSizeX;
 	this.mapSizeY;
+	this.mapName;
 
     this.generateFromHistory = function(){
 		let numberOfInstructions = historyOfPlacements.length;
@@ -319,6 +342,7 @@ function OutputData(){
 		this.positionsY = [];
 		
 		let j=0;
+		
 	
 		for(var i=0; i<numberOfInstructions; i++){
 		
@@ -366,6 +390,37 @@ function OutputData(){
 		this.mapSizeX = maxY - minY + 1;
 		this.mapSizeY = maxX - minX + 1;
 	}
+	
+
 }
 
+	function Asdasd(){
+		let mapLengthX = occupancyMap.length;
+		let mapLengthY = occupancyMap[0].length;
+		let mapJumper = 0;
+		let row=0, col=0;
+		let mapChanger=0;;
+		
+		for(col=0; col<mapLengthY; col++){
+			if(cutsMap[0][col] == CUT){
+				console.log("Horizontal map jump at: 0, " + col);
+				continue;
+			}
+			
+			for(row=0; row<mapLengthX; row++){
+				if( cutsMap[row][col] == CUT ){
+					mapJumper++;
+					console.log("New map");
+					continue;
+				}
+				console.log("currently at: " + row + ", " + col);
+				
+				if( occupancyMap[row][col] == OCCUPIED ){
+					let info = FindHistoryInfoAtPoint({x:row, y:col});
+					console.log("Found shape at map: " + mapJumper + "; ShapeInfo: ");
+					console.log(info);
+				}
+			}
+		}
+	}
 ////////////////////////////////////////////////////////////////////////////////////
