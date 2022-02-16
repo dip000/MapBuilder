@@ -129,7 +129,7 @@ var isShapeEditorActive = false;
 
 			//Remove and reacomodate registry
 			listOfShapes.splice(shapeIndex, 1);
-			listOfShapeNames.splice(shapeIndex, 1);			
+			listOfShapeNames.splice(shapeIndex, 1);
 			
 			//Reset shapes visuals
 			let itemsArea = document.getElementById('itemsArea');
@@ -154,6 +154,10 @@ var isShapeEditorActive = false;
 					DeleteFromHistoryOfPlacements( historyOfPlacements[i] );
 					printVisualsOfCoordenates(historyOfPlacements[i].coordenates, clearedGridColor);
 					UpdateOccupancy(historyOfPlacements[i].coordenates, FREE);
+				}
+				//Higher item types must reaccomodate. Lower item types stays the same
+				else if(historyOfPlacements[i].itemType > shapeIndex){
+					historyOfPlacements[i].itemType--;
 				}
 			}
 

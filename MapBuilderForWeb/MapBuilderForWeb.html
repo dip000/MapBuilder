@@ -98,6 +98,10 @@
 			//Starts showing map editor while hidning shapes editor
 			GoToMapEditor();
 			//GoToShapesEditor();
+
+			//FOR DEBUGGING ONLY
+			rows(3);
+			cols(3);
         }
 		
 
@@ -368,7 +372,8 @@
 		
 		function DownloadMap(){
 		
-			let outputData = JSON.stringify( formatCoordenates() );
+			//let outputData = JSON.stringify( formatCoordenates() );
+			let outputData = FormatOutput();
 			let ouputShapes = formatShapes();
 			
 			//console.log("DOWNLOADED:");

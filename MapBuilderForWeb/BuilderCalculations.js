@@ -61,15 +61,15 @@
         }
 		
 		function GlobalizeCoordenates(shape, x, y){			
-			let coordenates = new Vector2Array(shape);
-			
-            for(let i=0; i<coordenates.x.length; i++){
-                coordenates.x[i] += x;
-                coordenates.y[i] += y;
+			let coordenatesa = new Vector2Array(shape);
+
+			for(let i=0; i<shape.x.length; i++){
+                coordenatesa.x[i] += x;
+                coordenatesa.y[i] += y;
             }
             //console.log("GLOBALIZED TO TARGET VALUE: ");
             //console.log(coordenates);
-			return coordenates;
+			return coordenatesa;
 		}
 		
 		function RotateCoordenatesByAngle(coordenates, angle){
@@ -97,6 +97,18 @@
 		}
 		
 		
+		function RotatePerfect(vector2, maxX){
+			var tempX = vector2.x;
+			vector2.x = vector2.y;
+
+            for(var i=0; i<vector2.x.length; i++){
+                tempX[i] = maxX - tempX[i];
+            }
+			vector2.y = tempX;
+			
+			return vector2;
+		} 
+
         function RotateCoordenates90Clockwise(vector2){
 			
             //Flip axis. This actually mirors coordenates by 45 degrees

@@ -326,13 +326,13 @@ function ItemPlacingInfo(itemType, rotation, positionX, positionY, coordenates){
 }
 
 function OutputData(){
-	this.itemTypes;
-	this.itemRotations;
-	this.positionsX;
-	this.positionsY;
-	this.mapSizeX;
-	this.mapSizeY;
-	this.mapName;
+	this.itemTypes = new Array();
+	this.itemRotations = new Array();
+	this.positionsX = new Array();
+	this.positionsY = new Array();
+	this.mapSizeX = 0;
+	this.mapSizeY = 0;
+	this.mapName = "unnamed";
 
     this.generateFromHistory = function(){
 		let numberOfInstructions = historyOfPlacements.length;
@@ -390,37 +390,14 @@ function OutputData(){
 		this.mapSizeX = maxY - minY + 1;
 		this.mapSizeY = maxX - minX + 1;
 	}
-	
 
+	this.addPlacementInfo = function(info){
+		this.itemTypes[itemTypes.length] = info.itemType;
+		this.itemRotations.push( info.rotation );
+		this.positionsX.push( info.positionX );
+		this.positionsY.push( info.positionY );
+	}
+	
 }
 
-	function Asdasd(){
-		let mapLengthX = occupancyMap.length;
-		let mapLengthY = occupancyMap[0].length;
-		let mapJumper = 0;
-		let row=0, col=0;
-		let mapChanger=0;;
-		
-		for(col=0; col<mapLengthY; col++){
-			if(cutsMap[0][col] == CUT){
-				console.log("Horizontal map jump at: 0, " + col);
-				continue;
-			}
-			
-			for(row=0; row<mapLengthX; row++){
-				if( cutsMap[row][col] == CUT ){
-					mapJumper++;
-					console.log("New map");
-					continue;
-				}
-				console.log("currently at: " + row + ", " + col);
-				
-				if( occupancyMap[row][col] == OCCUPIED ){
-					let info = FindHistoryInfoAtPoint({x:row, y:col});
-					console.log("Found shape at map: " + mapJumper + "; ShapeInfo: ");
-					console.log(info);
-				}
-			}
-		}
-	}
 ////////////////////////////////////////////////////////////////////////////////////
