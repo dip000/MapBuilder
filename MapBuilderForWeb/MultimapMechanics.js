@@ -113,8 +113,15 @@
 		const mapLengthRows = occupancyMap.length;
 		const mapLengthCols = occupancyMap[0].length;
 
-		const islandSizeRows =  Math.round(mapLengthRows/nrows) - (nrows-1) + 1;
-		const islandSizeCols =  Math.round(mapLengthCols/ncols) - (ncols-1) + 1;
+		//Not considenring the space occupied for map cuts
+		const availableRows = mapLengthRows-(nrows-1);
+		const availableCols = mapLengthCols-(ncols-1);
+		
+		//Number of rows, cols of each island and its residue due map size
+		const islandSizeRows =  Math.floor( availableRows/nrows );
+		const islandSizeCols =  Math.floor( availableCols/ncols );
+		const residueRows =  availableRows % nrows;
+		const residueCols =  availableCols % ncols;
 
 		let outputData = new Array();
 
@@ -125,25 +132,32 @@
 				continue;
 			}
 			
-			let row = historyOfPlacements[i].positionX;
-			let col = historyOfPlacements[i].positionY;
+			//TODO: positionsX and positionsY are not always a part of the item. Use coordenates.x[0] instead
+			let row = historyOfPlacements[i].coordenates.x[0];
+			let col = historyOfPlacements[i].coordenates.y[0];
 
 			for(var r=0; r<nrows; r++){
 				for(var c=0; c<ncols; c++){
+					
+					//Make all maps including empty ones
+					if(outputData[r] == null){
+						outputData[r] = new Array();
+					}
+					if(outputData[r][c] == null){
+						outputData[r][c] = new OutputData();
+					}
+					
+					//Localizating current item by looking at previous and next rows and cols
 					if( row>islandSizeRows*r && row<islandSizeRows*(r+1) && col>islandSizeCols*c  && col<islandSizeCols*(c+1) ){
 						console.log("Found type: " + listOfShapeNames[ historyOfPlacements[i].itemType ] + " in ("+ r +","+c+") island");
 						
-						if(outputData[r] == null){
-							outputData[r] = new Array();
-						}
-						if(outputData[r][c] == null){
-							outputData[r][c] = new OutputData();
-						}
+						//add info on its respective map
 						outputData[r][c].itemTypes.push(historyOfPlacements[i].itemType);
 						outputData[r][c].itemRotations.push(historyOfPlacements[i].rotation);
 						outputData[r][c].positionsX.push(historyOfPlacements[i].positionX);
 						outputData[r][c].positionsY.push(historyOfPlacements[i].positionY);
 						
+						//redoundant here but whatever
 						outputData[r][c].mapSizeX = islandSizeRows;
 						outputData[r][c].mapSizeY = islandSizeCols;
 					}
@@ -151,31 +165,31 @@
 			}
 		}
 
+		
+		//Stringify the output
+		console.log("residueRows: " +residueRows + "; residueCols: " +residueCols);
 		let outString = "";
-		for(var i=0; i<outputData.length; i++){
-			for(var j=0; j<outputData[0].length; j++){
+		for(var r=0; r<outputData.length; r++){
+			for(var c=0; c<outputData[0].length; c++){
 				
-				let formatedCoordenates = new Vector2Array( outputData[i][j].positionsX, outputData[i][j].positionsY );
+				//PositionsX and positionsY are not always a part of the item.
+				let formatedCoordenates = new Vector2Array( outputData[r][c].coordenates.x[0], outputData[r][c].coordenates.y[0] );
+				let originRows = (islandSizeRows+1) * r;
+				let originCols = (islandSizeCols+1) * c;
 
-				console.log(outputData[i][j].positionsX+ "--" + outputData[i][j].positionsY);
-				//console.log(new Vector2Array(formatedCoordenates));
-				let globalizedCoordenates = GlobalizeCoordenates( formatedCoordenates, -i*islandSizeRows, -j*islandSizeCols );
-				console.log("-i*islandSizeRows: "+(-i*islandSizeRows)+"; -j*islandSizeCols: "+(-j*islandSizeCols));
+				
+				console.log("r: " +r + "; c: " + c);
+				console.log(outputData[r][c].positionsX+ "--" + outputData[r][c].positionsY);
+				let globalizedCoordenates = GlobalizeCoordenates( formatedCoordenates, -originRows,  -originCols);
 				//console.log(new Vector2Array(globalizedCoordenates));
 
-				let residueX = (mapLengthRows-(nrows-1)) % nrows;
-				let residueY = (mapLengthCols-(ncols-1)) % ncols;
-
-				let rotatedCoordenates = RotatePerfect( globalizedCoordenates, (islandSizeRows + residueX-1));
+				let rotatedCoordenates = RotatePerfect( globalizedCoordenates, islandSizeRows-1 );
 				console.log(new Vector2Array(rotatedCoordenates));
-				console.log("residueX: " +residueX);
-				console.log("residueY: " +residueY);
-				console.log("(islandSizeRows + residueX-1): " +(islandSizeRows + residueX-1));
 
-				outputData[i][j].positionsX = rotatedCoordenates.x;
-				outputData[i][j].positionsY = rotatedCoordenates.y;
+				outputData[r][c].positionsX = rotatedCoordenates.x;
+				outputData[r][c].positionsY = rotatedCoordenates.y;
 
-				outString += JSON.stringify( outputData[i][j] );
+				outString += JSON.stringify( outputData[r][c] );
 				outString += "&";
 			}
 		}
