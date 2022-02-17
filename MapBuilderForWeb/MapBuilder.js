@@ -213,7 +213,7 @@
 
 
 //UNDO MECHANICS  ////////////////////////////////////////////////////////
-		document.onkeyup = function(e) {
+		/*document.onkeyup = function(e) {
 			//Ctrl+Z  is  Undo
 			if( e.ctrlKey && e.which == 90 && !e.shiftKey){
 				UndoAction(-1);
@@ -254,8 +254,39 @@
 				printVisualsOfCoordenates(itemPlacingInfo.coordenates, itemPlacedColor);
 				UpdateOccupancy(itemPlacingInfo.coordenates, OCCUPIED);
 			}
-		}
+		}*/
 ////////////////////////////////////////////////////////////////////////////////////
+
+const keyLog = {}
+const handleKeyboard = ({ type, key, repeat, metaKey }) => {
+  if (repeat) return
+
+  if (type === 'keydown') {
+    keyLog[key] = true
+    
+	
+    if (/*keyLog.c &&*/ key === "ArrowLeft")
+		cols(ncols-1);
+    if (/*keyLog.c &&*/ key === "ArrowRight")
+		cols(ncols+1);
+	if (/*keyLog.r &&*/ key === "ArrowDown")
+		rows(nrows-1);
+	if (/*keyLog.r &&*/ key === "ArrowUp")
+		rows(nrows+1);
+ }
+
+  // Remove the key from the log on keyup.
+  if (type === 'keyup') delete keyLog[key];
+}
+
+
+function initailizeKeyCombos(){
+  const events = ['keydown', 'keyup']
+  events.forEach(name => document.addEventListener(name, handleKeyboard))
+
+  return () =>
+    events.forEach(name => document.removeEventListener(name, handleKeyboard))
+}
 
 
 // TYPES AND CONSTRUCTORS //////////////////////////////////////////////////////////

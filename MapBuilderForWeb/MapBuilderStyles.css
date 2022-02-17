@@ -1,6 +1,6 @@
 
 	:root{
-		/* GREEN TO YELLOW PALLETE
+		/* GREEN TO YELLOW PALETTE
   		--darker: #00703E;
   		--dark: #1D8742;
   		--normal-dark: #389D43;
@@ -9,42 +9,56 @@
   		--light: #95E02F;
   		--lighter: #B9F51B;
 		*/
+
+		/* VISUAL STUDIO PALETTE
+		--blue: #569CD6;
+		--light-blue: #9CDCFE;
+		--green: #57A64A;
+		--light-green: #4EC9B0;
+		--yellow: #DCDCAA;
+		--pink: #D8A0D1;
+		--orange: #D69D85;
+		*/
 		
-  		--background: #1D8742;
-  		--table-shadow: #00703E;
-  		--item-hover: #55B441;
-  		--item-shadow: #00703E;
-  		--item-click: #B9F51B;
-  		--lateral-menu-background: #55B441;
-  		--side-button: #00703E;
-  		--side-button-hover: #00501E;
-  		--download-button: #95E02F;
-  		--download-button-hover: #B9F51B;
+  		--background: #1E1E1E;
+  		--table-shadow: #111111;
+  		--item-hover: #D69D85;
+  		--item-shadow: #D69D85;
+  		--item-click: #D69D85;
+  		--lateral-menu-background: #353535;
+  		--side-button: #D8A0D1;
+  		--side-button-hover: #D69D85;
+  		--download-button: #D8A0D1;
+  		--download-button-hover: #D69D85;
+		--white:#ffffff;
+		--light-gray:#DCDCDC;
+		--delete-icon: #DCDCAA;
 	}
 
 
 	tr, td {
 		padding: 0.6rem;
-		border: 1px dashed lightGray;
-		background-color:white;
+		border: 1px dashed var(--light-gray);
+		background-color: var(--white);
 		vertical-align: top;
 		cursor: pointer;
 	}
 	table {
 		border: 0px;
+		border-radius: 3px;
 		border-collapse: collapse;
 		margin:2px;
 		box-shadow: 0px 0px 15px var(--table-shadow);
 
 		font-size: 1rem;
 		font-weight: bold;
-		color: white;
+		color: var(--white);
 	}
 	
 	.layout{
 		background-color: var(--background);
 		padding: 5px;
-		border: 1px dashed lightGray;
+		border: 1px dashed var(--background);
 	}
 
 	body {
@@ -56,14 +70,13 @@
 	.items .item{
 		display: inline-block;
 		padding: 5px;
+		margin-right: 20px;
 		cursor: pointer;
 		box-shadow: none;
-		border: 2px dashed #00000000;
 		border-radius: 3px;
 		transition: 0.1s ease-in-out;
 	}	
 		.item:hover {
-			border: 2px dashed var(--item-click);
 			box-shadow: 0px 0px 15px var(--item-click);
 			transform: scale(1.1);
 			transition: 0.1s ease-in-out;
@@ -80,15 +93,15 @@
 	#lateralMenuGraphics {
 		background-color: var(--lateral-menu-background);
 		box-shadow: 0px 0px 5px var(--lateral-menu-background);
-		min-height: 410px;
+		min-height: 423px;
 		cursor: default;
 		width: 290px;
 	}
 	#itemsArea {
-		height: 180px;
+		height: 190px;
 		cursor: default;
 		overflow-x: auto;
-		max-width: 1000px;
+		max-width: 1236px;
 	
 		display: flex;
 		align-items: center;
@@ -106,9 +119,8 @@
 	
 	
 	.addShapeButton{
-		background-color: white;
+		background-color: var(--white);
 		border-radius: 50px;
-		border: 2px dashed var(--background);
 		text-align: center;
 		padding-bottom: 9;
 		width: 50;
@@ -119,8 +131,7 @@
 	}
 		.addShapeButton:hover{
 			background-color: var(--item-hover);
-			color: white;
-			border: 2px dashed var(--item-click);
+			color: var(--white);
 			box-shadow: 0px 0px 15px var(--item-click);
 			transform: scale(1.1);		
 			transition: 0.1s ease-in-out;
@@ -141,11 +152,11 @@
 		width: 270px;
 		height: 90px;
 		background-color: var(--side-button);
-		border: 2px dashed lightGray;
+		/*border: 5px dashed var(--lateral-menu-background);*/
 		
 		font-size: 2rem;
 		font-weight: bold;
-		color: white;
+		color: var(--white);
 		
 		cursor: pointer;
 	}
@@ -162,7 +173,7 @@
 		}
 		
 	.inputName {
-		border: 2px dashed lightGray;
+		border: 2px dashed var(--light-gray);
 		padding: 19px;
 		margin-top: 10px;
 		transition: 0.1s ease-out;
@@ -172,7 +183,7 @@
 	}
 		.inputName:hover {
 			background-color: var(--item-hover);
-			color: white;
+			color: var(--white);
 			border: 2px dashed var(--item-click);
 			box-shadow: 0px 0px 15px var(--item-click);
 			transform: scale(1.1);		
@@ -181,11 +192,11 @@
 		
 	.deleteIcon{
 		float: right;
-		color: white;
+		color: var(--white);
 	}
 		.deleteIcon:hover{
 			float: right;
-			color: #FF5555AA;
+			color: var(--delete-icon);
 		}
 
  /*style="transform: rotate(90deg)"*/

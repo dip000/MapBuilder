@@ -48,13 +48,13 @@
 		var shapeElements = [];
 		
 		//Colors
-		const itemShowcaseColor = "#1D8742";
-		const itemShadowColor = "#1D874288";
-		const itemPlacedColor = "#1D8742";
+		const itemShowcaseColor = "#569CD6";
+		const itemShadowColor = "#9CDCFE";
+		const itemPlacedColor = "#569CD6";
 		const clearedGridColor = "white";
-		const itemSelectedColor = "#B9F51B";
-		const itemDefaultColor = "#1D8742";
-		const mapCutColor = "#1D8742";
+		const itemSelectedColor = "#D69D85";
+		const itemDefaultColor = "#1E1E1E";
+		const mapCutColor = "#1E1E1E";
 		
 		//List Of Shapes
 		var listOfShapes = [
@@ -82,6 +82,7 @@
 			//Both share same stuff
 			initializeMapEditorStatistics();
 			initializeMapEditorShapes();
+			initailizeKeyCombos();
 
 			//Initialize Map editor
 			initializeMapEditorGrid(20, 40);
@@ -100,8 +101,8 @@
 			//GoToShapesEditor();
 
 			//FOR DEBUGGING ONLY
-			rows(3);
-			cols(3);
+			//rows(3);
+			//cols(3);
         }
 		
 
@@ -241,7 +242,11 @@
 ///////////////////// MAIN ////////////////////////////////////////////////////
 		
 		function ResetMap(){
-			
+			ResetOccupancyMap();
+			ResetCutsMap();
+		}
+
+		function ResetOccupancyMap(){
 			let formatedCoordenates = OccupancyMapToCoordenates(occupancyMap);
 			printVisualsOfCoordenates(formatedCoordenates, clearedGridColor);
 			
@@ -255,6 +260,9 @@
 			occupancyMap = Array(mapLengthX).fill(null).map(()=>Array(mapLengthY).fill(false));
 			
 			//Reset cuts in map. See MultimapMechanics.js for more info
+		}
+
+		function ResetCutsMap(){
 			rows(nrows);
 			cols(ncols);
 		}

@@ -130,7 +130,8 @@ var isShapeEditorActive = false;
 			//Remove and reacomodate registry
 			listOfShapes.splice(shapeIndex, 1);
 			listOfShapeNames.splice(shapeIndex, 1);
-			
+			listOfShapeColors.splice(shapeIndex, 1);
+		
 			//Reset shapes visuals
 			let itemsArea = document.getElementById('itemsArea');
 			itemsArea.innerHTML = "";

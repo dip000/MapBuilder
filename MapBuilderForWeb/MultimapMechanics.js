@@ -3,16 +3,38 @@
 	var nrows=1, ncols=1;
 	
 	function map(x, y){
-		if(x == 0 || y == 0)
-			return;
+		if(x <= 0 || y <= 0) return;
 		
 		if( !AskForReset() ) return;
-		
+
+		ResetOccupancyMap();
+
+		if(table != null){
+			document.getElementById("GridGraphics").removeChild(table);
+			table = null;
+		}
 		initializeMapEditorGrid(x, y);
+		ResetCutsMap();
 	}
+
+	function AskForReset(){
+		let coordenates = OccupancyMapToCoordenates(occupancyMap);
+		if( (coordenates.x.length != 0) && (confirm("Requires a reset. Continue?") == false) )
+			return false;
 	
+		return true;
+	}
+
 	function rows(numberOfRows){
-		
+		if( !AskForReset() ) return;
+
+		ResetOccupancyMap();
+		if(table != null){
+			document.getElementById("GridGraphics").removeChild(table);
+			table = null;
+		}
+		initializeMapEditorGrid(occupancyMap.length, occupancyMap[0].length);
+
 		let maxRows = Math.round( occupancyMap.length/2 );
 		if(numberOfRows <= 0){
 			console.log("Applied minimum (1) instead");
@@ -31,6 +53,14 @@
 	}
 	
 	function cols(numberOfCols){
+
+		if( !AskForReset() ) return;
+		ResetOccupancyMap();
+		if(table != null){
+			document.getElementById("GridGraphics").removeChild(table);
+			table = null;
+		}
+		initializeMapEditorGrid(occupancyMap.length, occupancyMap[0].length);
 
 		let maxCols = Math.round( occupancyMap[0].length/2 );
 		if(numberOfCols <= 0){
@@ -95,17 +125,7 @@
 		}
 	}
 	
-	function AskForReset(){
-		let coordenates = OccupancyMapToCoordenates(occupancyMap);
-		if( (coordenates.x.length != 0) && (confirm("Requires a reset. Continue?") == false) )
-			return false;
-	
-		if(table != null)
-			document.getElementById("GridGraphics").removeChild(table);
 
-		ResetMap();
-		return true;
-	}
 
 	function FormatOutput(){
 		const numberOfInstructions = historyOfPlacements.length;
@@ -132,7 +152,7 @@
 				continue;
 			}
 			
-			//TODO: positionsX and positionsY are not always a part of the item. Use coordenates.x[0] instead
+			//PositionsX and positionsY are not always a part of the item.
 			let row = historyOfPlacements[i].coordenates.x[0];
 			let col = historyOfPlacements[i].coordenates.y[0];
 
@@ -146,9 +166,28 @@
 					if(outputData[r][c] == null){
 						outputData[r][c] = new OutputData();
 					}
+
+					//console.log("r,c from: "+(islandSizeRows+1)*r + "," + (islandSizeCols+1)*c);
+					//console.log("r,c to:   " + ((islandSizeRows+1)*(r+1)-1) + "," + ((islandSizeCols+1)*(c+1)-1) );
+					//console.log("--------------------------------------------");
 					
+					//To find previous and next rows of current point
+					let prevRow = (islandSizeRows+1)*r;
+					let prevCol = (islandSizeCols+1)*c;
+
+					let nextRow = ((islandSizeRows+1)*(r+1)-1);
+					let nextCol = ((islandSizeCols+1)*(c+1)-1);
+
+					//To find point even if the map was not sliced evenly
+					if(c >= ncols-1){
+						nextCol += residueCols;
+					}
+					if(r >= nrows-1){
+						nextRow += residueRows;
+					}
+
 					//Localizating current item by looking at previous and next rows and cols
-					if( row>islandSizeRows*r && row<islandSizeRows*(r+1) && col>islandSizeCols*c  && col<islandSizeCols*(c+1) ){
+					if( row>=prevRow && row<=nextRow && col>=prevCol  && col<=nextCol ){
 						console.log("Found type: " + listOfShapeNames[ historyOfPlacements[i].itemType ] + " in ("+ r +","+c+") island");
 						
 						//add info on its respective map
@@ -157,7 +196,7 @@
 						outputData[r][c].positionsX.push(historyOfPlacements[i].positionX);
 						outputData[r][c].positionsY.push(historyOfPlacements[i].positionY);
 						
-						//redoundant here but whatever
+						//NOTE: Redoundant here
 						outputData[r][c].mapSizeX = islandSizeRows;
 						outputData[r][c].mapSizeY = islandSizeCols;
 					}
@@ -165,38 +204,46 @@
 			}
 		}
 
-		
-		//Stringify the output
-		console.log("residueRows: " +residueRows + "; residueCols: " +residueCols);
+		//return outputData;
+
+		//Stringify output of each map
 		let outString = "";
-		for(var r=0; r<outputData.length; r++){
-			for(var c=0; c<outputData[0].length; c++){
+		for(var r=0; r<nrows; r++){
+			for(var c=0; c<ncols; c++){
 				
-				//PositionsX and positionsY are not always a part of the item.
-				let formatedCoordenates = new Vector2Array( outputData[r][c].coordenates.x[0], outputData[r][c].coordenates.y[0] );
+				//Coordenates are not formated, so extract, reformat and reassign
+				let formatedCoordenates = new Vector2Array( outputData[r][c].positionsX, outputData[r][c].positionsY );
+				
+				//Origin is the top left corner of given [r][c] map
 				let originRows = (islandSizeRows+1) * r;
 				let originCols = (islandSizeCols+1) * c;
-
 				
+				//Reference each points in map from its local origin
 				console.log("r: " +r + "; c: " + c);
 				console.log(outputData[r][c].positionsX+ "--" + outputData[r][c].positionsY);
+				//console.log(new Vector2Array( new Vector2Array(formatedCoordenates)) );
 				let globalizedCoordenates = GlobalizeCoordenates( formatedCoordenates, -originRows,  -originCols);
 				//console.log(new Vector2Array(globalizedCoordenates));
-
+				
+				//Switch axis from (rwo,col) to (x,y). To rotate all points in a fixed area is needed a reference to the highest point in rows axis, which is size-1
 				let rotatedCoordenates = RotatePerfect( globalizedCoordenates, islandSizeRows-1 );
 				console.log(new Vector2Array(rotatedCoordenates));
 
+				//Coordenates are formated and sent back to output data
 				outputData[r][c].positionsX = rotatedCoordenates.x;
 				outputData[r][c].positionsY = rotatedCoordenates.y;
 
+				//string output and add the separator character
 				outString += JSON.stringify( outputData[r][c] );
 				outString += "&";
+
+				console.log("----------------------------");
 			}
 		}
 
+		//Take out last separator character
 		outString = outString.slice(0, -1);
 		return outString;
 	}
-	
 
 	
