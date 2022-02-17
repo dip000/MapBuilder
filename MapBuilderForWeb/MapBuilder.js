@@ -259,21 +259,34 @@
 
 const keyLog = {}
 const handleKeyboard = ({ type, key, repeat, metaKey }) => {
-  if (repeat) return
+	if (repeat) return
 
-  if (type === 'keydown') {
-    keyLog[key] = true
-    
-	
-    if (/*keyLog.c &&*/ key === "ArrowLeft")
-		cols(ncols-1);
-    if (/*keyLog.c &&*/ key === "ArrowRight")
-		cols(ncols+1);
-	if (/*keyLog.r &&*/ key === "ArrowDown")
-		rows(nrows-1);
-	if (/*keyLog.r &&*/ key === "ArrowUp")
-		rows(nrows+1);
- }
+	if (type === 'keydown') {
+	keyLog[key] = true
+
+	//Create cuts on rows and cols with Ctrl + arrow keys
+	if(keyLog.Control){
+		if (key === "ArrowLeft")
+			cols(ncols-1);
+		if (key === "ArrowRight")
+			cols(ncols+1);
+		if (key === "ArrowDown")
+			rows(nrows-1);
+		if (key === "ArrowUp")
+			rows(nrows+1);
+	}
+	else{
+		//Rebuild map rows and cols with arrow keys
+		if (key === "ArrowLeft")
+			map( occupancyMap.length, occupancyMap[0].length-1 );
+		if (key === "ArrowRight")
+			map( occupancyMap.length, occupancyMap[0].length+1 );
+		if (key === "ArrowDown")
+			map( occupancyMap.length+1, occupancyMap[0].length );
+		if (key === "ArrowUp")
+			map( occupancyMap.length-1, occupancyMap[0].length );
+	}
+}
 
   // Remove the key from the log on keyup.
   if (type === 'keyup') delete keyLog[key];
@@ -430,5 +443,85 @@ function OutputData(){
 	}
 	
 }
+
+////////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////// UPLOAD /////////////////////////////////////////////////
+
+	function upload(uploadString){
+		let mapsAndShapesString = uploadString.split("$");
+		let mapsString = mapsAndShapesString[0].split("&");
+		let shapesString = mapsAndShapesString[1].split("&");
+
+		uploadShapes(shapesString);
+		//uploadMaps(mapsString);
+
+		/*console.log(mapsString)
+		console.log(shapesString)
+
+		console.log(maps)
+		console.log(shapes)*/
+	}
+
+	function uploadShapes(shapesString){
+		listOfShapes = [];
+		let shapes = [];
+		for(let i=0; i<shapesString.length; i++){
+			shapes[i] = JSON.parse(shapesString[i]);
+
+			let shape = new Vector2Array(shapes[i].localCoordenatesX, shapes[i].localCoordenatesY);
+			let shapeRotated = RotateCoordenatesByAngle( shape, 90 );
+
+			listOfShapes[i] = shapeRotated;
+			listOfShapeNames[i] = shapes[i].itemName;
+			listOfShapeColors[i] = randomColor();
+		}
+
+		//Reset shapes visuals
+		let itemsArea = document.getElementById('itemsArea');
+		itemsArea.innerHTML = "";
+		
+		//Show all current shapes
+		initializeMapEditorShapes(listOfShapes.length-1);
+
+	}
+
+	function uploadMaps(mapsString){
+		let maps = [];
+		let mapSize;
+
+		// Simplified version with a non cutted map
+		if(mapsString.length == 1){
+			rows(1);
+			cols(1);
+
+			maps = JSON.parse(mapsString[0]);
+			updateMap(maps);
+			return;
+		}
+
+		// First parse all
+		let nmaps = mapsString.length;
+		for(let i=0; i<nmaps; i++){
+			maps[i] = JSON.parse(mapsString[i]);
+		}
+
+		let mapSizeX = maps[0].maps.mapSizeX;
+		rows(1);
+		cols(1);
+
+	}
+
+	function updateMap(maps){
+		map(maps.mapSizeX, maps.mapSizeY);
+
+		for(let i=0; i<maps.positionsX.length; i++){
+			ChangeItem(maps.itemTypes[i]);
+			currentItemPlacingInfo.rotation = maps.itemRotations[i];
+			OnGridClick(maps.positionsX[i], maps.positionsY[i]);
+		}
+	}
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////

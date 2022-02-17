@@ -87,28 +87,33 @@
 	function UpdateCutsMap(target, numberOfSuch, state){
 		let x, y;
 		let mapLengthB, mapLengthA;
+		let nSuch;
 
 		if(target == TARGET_ROWS){
 			mapLengthA = occupancyMap.length;
 			mapLengthB = occupancyMap[0].length;
+			nSuch = nrows;
 		}
 		else{
 			mapLengthB = occupancyMap.length;
 			mapLengthA = occupancyMap[0].length;
+			nSuch = ncols;
 		}
 
-		let increment = mapLengthA / numberOfSuch;
-		let incrementRounded = Math.round( increment );
+		const available = mapLengthA-(nSuch-1);
+		const islandSize = available / numberOfSuch;
+		const islandSizeWithCut = islandSize + 1;
+		const increment = Math.floor( islandSizeWithCut );
 		
 		for(let i=0; i<numberOfSuch-1; i++){
 			for(let j=0; j<mapLengthB; j++){
 				if(target == TARGET_ROWS){
 					y = j;
-					x = incrementRounded*(i+1)-1;
+					x = increment*(i+1)-1;
 				}
 				else{
 					x = j;
-					y = incrementRounded*(i+1)-1;
+					y = increment*(i+1)-1;
 				}
 				
 				if(state == CUT){
@@ -196,9 +201,6 @@
 						outputData[r][c].positionsX.push(historyOfPlacements[i].positionX);
 						outputData[r][c].positionsY.push(historyOfPlacements[i].positionY);
 						
-						//NOTE: Redoundant here
-						outputData[r][c].mapSizeX = islandSizeRows;
-						outputData[r][c].mapSizeY = islandSizeCols;
 					}
 				}
 			}
@@ -219,25 +221,37 @@
 				let originCols = (islandSizeCols+1) * c;
 				
 				//Reference each points in map from its local origin
-				console.log("r: " +r + "; c: " + c);
-				console.log(outputData[r][c].positionsX+ "--" + outputData[r][c].positionsY);
-				//console.log(new Vector2Array( new Vector2Array(formatedCoordenates)) );
 				let globalizedCoordenates = GlobalizeCoordenates( formatedCoordenates, -originRows,  -originCols);
-				//console.log(new Vector2Array(globalizedCoordenates));
 				
 				//Switch axis from (rwo,col) to (x,y). To rotate all points in a fixed area is needed a reference to the highest point in rows axis, which is size-1
 				let rotatedCoordenates = RotatePerfect( globalizedCoordenates, islandSizeRows-1 );
-				console.log(new Vector2Array(rotatedCoordenates));
 
 				//Coordenates are formated and sent back to output data
 				outputData[r][c].positionsX = rotatedCoordenates.x;
 				outputData[r][c].positionsY = rotatedCoordenates.y;
 
+				//Switched map dimentions to match with the (x,y) system
+				let mapSizeX = islandSizeCols;
+				let mapSizeY = islandSizeRows;
+
+				//If the map was not sliced evenly, compenzate residues in last row and col
+				if(c >= ncols-1){
+					mapSizeX += residueCols;
+				}
+				if(r >= nrows-1){
+					mapSizeY += residueRows;
+				}
+
+				//Apply map size
+				outputData[r][c].mapSizeX = mapSizeX;
+				outputData[r][c].mapSizeY = mapSizeY;
+
+				//Map name is its position
+				outputData[r][c].mapName = "Level " + r + ", " + c;
+
 				//string output and add the separator character
 				outString += JSON.stringify( outputData[r][c] );
 				outString += "&";
-
-				console.log("----------------------------");
 			}
 		}
 

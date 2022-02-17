@@ -380,8 +380,12 @@
 		
 		function DownloadMap(){
 		
-			//let outputData = JSON.stringify( formatCoordenates() );
-			let outputData = FormatOutput();
+			let outputData;
+			if(ncols == 1 && nrows == 1)
+				outputData = JSON.stringify( formatCoordenates() );
+			else
+				outputData = FormatOutput();
+				
 			let ouputShapes = formatShapes();
 			
 			//console.log("DOWNLOADED:");
