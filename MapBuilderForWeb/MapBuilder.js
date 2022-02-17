@@ -11,17 +11,19 @@
         }
 
   
-		var occupancyMap;
 		const OCCUPIED = true;
 		const FREE = false;
 		const OUT_OF_BOUNDS = 2;
 		const OBSTRUCTED = 3;
 		const MAP_CUT = 4;
+		const NULL = 5;
 		function GetOccupancyOfPlacingInfo(){
-			//If at least one coordenate is occupied, then return occupied
- 			let mapLengthX = occupancyMap.length;
-			let mapLengthY = occupancyMap[0].length;
+
+ 			//let mapLengthX = occupancyMap.length;
+			//let mapLengthY = occupancyMap[0].length;
 			
+			let occupancyMap = occupancyMaps[currentItemPlacingInfo.level.x][currentItemPlacingInfo.level.y];
+
 			let x = currentItemPlacingInfo.coordenates.x;
 			let y = currentItemPlacingInfo.coordenates.y;
 
@@ -29,7 +31,7 @@
 				let state = ( occupancyMap[ currentItemPlacingInfo.positionX ][ currentItemPlacingInfo.positionY ] );
 				
 				if( state == null){
-					return MAP_CUT;
+					return NULL;
 				}
 				if( state == OCCUPIED){
 					return OCCUPIED;
@@ -54,6 +56,7 @@
 
 		
 		function UpdateOccupancy(coordenates, state){
+			let occupancyMap = occupancyMaps[currentItemPlacingInfo.level.x][currentItemPlacingInfo.level.y];
 			for(var i=0; i<coordenates.x.length; i++){
 				occupancyMap[coordenates.x[i]][coordenates.y[i]] = state;
 			}		
@@ -141,8 +144,7 @@
 			
 			newCoordenates = new Vector2Array();
 			let j=0;
-			let mapLengthX = occupancyMap.length;
-			let mapLengthY = occupancyMap[0].length;
+			let occupancyMap = occupancyMaps[currentItemPlacingInfo.level.x][currentItemPlacingInfo.level.y];
 			
 			for(let i=0; i<coordenates.x.length; i++){
 				
@@ -166,7 +168,7 @@
 			
 			let outputData = new OutputData();
 			outputData.generateFromHistory();
-			outputData.generateFromMap();
+			outputData.generateFromMap(occupancyMaps[currentItemPlacingInfo.level.x][currentItemPlacingInfo.level.y]);
 		
 			let formatedCoordenates = new Vector2Array(outputData.positionsX, outputData.positionsY);
 			formatedCoordenates = LocalizeCoordenates(formatedCoordenates);
@@ -330,7 +332,7 @@ function Vector2Array(x, y) {
 	}
 }
 
-function ItemPlacingInfo(itemType, rotation, positionX, positionY, coordenates){
+function ItemPlacingInfo(itemType, rotation, positionX, positionY, coordenates, level){
 
 	if(itemType instanceof ItemPlacingInfo){
 		let instance = JSON.parse(JSON.stringify(itemType));
@@ -341,6 +343,7 @@ function ItemPlacingInfo(itemType, rotation, positionX, positionY, coordenates){
 		this.coordenates = instance.coordenates;
 		this.indexInHistory = instance.indexInHistory;
 		this.deleted = instance.deleted;
+		this.level = instance.level;
 	}
 	else if(itemType == null){
 		this.itemType  = 0;
@@ -348,7 +351,8 @@ function ItemPlacingInfo(itemType, rotation, positionX, positionY, coordenates){
 		this.positionX = 0;
 		this.positionY = 0;
 		this.coordenates = new Vector2Array();
-		
+		this.level = {x:0, y:0};
+	
 		//Internal properties
 		this.indexInHistory = 0;
 		this.deleted = false;
@@ -359,6 +363,7 @@ function ItemPlacingInfo(itemType, rotation, positionX, positionY, coordenates){
 		this.positionX = positionX;
 		this.positionY = positionY;
 		this.coordenates = coordenates;
+		this.level = level;
 		
 		//Internal properties
 		this.indexInHistory = 0;
@@ -386,7 +391,6 @@ function OutputData(){
 		this.positionsY = [];
 		
 		let j=0;
-		
 	
 		for(var i=0; i<numberOfInstructions; i++){
 		
@@ -403,7 +407,7 @@ function OutputData(){
 		}
 	}
 
-	this.generateFromMap = function(){
+	this.generateFromMap = function(occupancyMap){
 		let mapLengthX = occupancyMap.length;
 		let mapLengthY = occupancyMap[0].length;
 		let minX = 999;
@@ -435,12 +439,6 @@ function OutputData(){
 		this.mapSizeY = maxX - minX + 1;
 	}
 
-	this.addPlacementInfo = function(info){
-		this.itemTypes[itemTypes.length] = info.itemType;
-		this.itemRotations.push( info.rotation );
-		this.positionsX.push( info.positionX );
-		this.positionsY.push( info.positionY );
-	}
 	
 }
 

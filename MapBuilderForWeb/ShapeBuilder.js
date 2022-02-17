@@ -81,16 +81,15 @@ var isShapeEditorActive = false;
 		}
 
 		function ResetShape(){
+			let occupancyMap = occupancyMaps[currentItemPlacingInfo.level.x][currentItemPlacingInfo.level.y];
+
 			//console.log("ResetShape stuff happens");
 			let formatedCoordenates = OccupancyMapToCoordenates(shapeMap);
 			for(let i=0; i<formatedCoordenates.x.length; i++){
 				printVisualsOfShapeEditorCoordenates(formatedCoordenates.x[i], formatedCoordenates.y[i], clearedGridColor);
 			}
 			
-			let mapLengthX = occupancyMap.length;
-			let mapLengthY = occupancyMap[0].length;
-			
-			shapeMap = Array(mapLengthX).fill(null).map(()=>Array(mapLengthY).fill(false));
+			shapeMap = Array(shapesGridSize.x).fill(null).map(()=>Array(shapesGridSize.y).fill(false));
 		}
 
 		function RegisterCoordenatesInShapesMap(x, y, state){
@@ -110,7 +109,7 @@ var isShapeEditorActive = false;
 		function GoToMapEditor(){
 			HideShapesEditor();
 			
-			table.style.display = "initial";
+			gridMap.style.display = "initial";
 			let lateralButtons = document.getElementsByClassName("control")[0];
 			lateralButtons.style.display = "initial";
 			isShapeEditorActive = false;

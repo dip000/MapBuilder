@@ -6,16 +6,17 @@
 	let value = "646970303030";
 	var isClicking = false;
 	
-	function AddHoverListenerToElements(elements){
+	function AddHoverListenerToElements(elements, callback){
 		for(let i=0; i<elements.length; i++){
 			elements[i].addEventListener('mouseenter', function(e){
 				currentItemPlacingInfo.positionX = e.target.parentElement.rowIndex;
 				currentItemPlacingInfo.positionY = e.target.cellIndex;
-				
-				//console.log("Hovering: " + typeof(currentItemPlacingInfo.positionX) +","+ currentItemPlacingInfo.positionY);
-				
+				currentItemPlacingInfo.level = callback();
+								
 				positionX.innerHTML = currentItemPlacingInfo.positionX;
 				positionY.innerHTML = currentItemPlacingInfo.positionY;
+				levelElement.innerHTML = currentItemPlacingInfo.level.x + ", " + currentItemPlacingInfo.level.y;
+
 				
 				printHoverVisuals();
 				printHoverShapeVisuals();
@@ -27,14 +28,19 @@
 					else{
 						OnGridClickAndDrag(currentItemPlacingInfo.positionX, currentItemPlacingInfo.positionY);
 					}
-					
-					//console.log("isClicking: " + isClicking + "; isShapeEditorActive:" + isShapeEditorActive);
 				}
 				
 			
 			}, false);
 		}
 	}
+
+	/*visualsReseteer();
+	function visualsReseteer(){
+		setInterval(function(){
+			printVisualsOfCoordenates( previusCoordenates , clearedGridColor );
+		}, 1000);
+	}*/
 
 	function AddClickListenerToElement(element, callback){
 		element.addEventListener('mousedown', function(e) {
@@ -43,7 +49,7 @@
 			let y = e.target.cellIndex;
 			topValue.innerHTML = getStatisticsTopValue(value);
 			
-			isClicking = true;;
+			isClicking = true;
 
 			if(x == null || y == null) return;
 			callback(x, y);
@@ -90,6 +96,8 @@
 		coordenates = IgnoreOccupiedCoordenates(coordenates);
 		previusCoordenates = IgnoreOccupiedCoordenates(previusCoordenates);
 		
+		//console.log(new Vector2Array(coordenates));
+
 		printVisualsOfCoordenates( previusCoordenates , clearedGridColor );
 		printVisualsOfCoordenates( coordenates, itemShadowColor );
 		
@@ -117,10 +125,15 @@
 		}catch{}
 	}
 	
-	function printVisualsOfCoordenates(shape, color){
+	function printVisualsOfCoordenates(shape, color, level){
 		if(shape==null) return;
+
+		if(level == null)
+			level = levels[currentItemPlacingInfo.level.x][currentItemPlacingInfo.level.y];
+		//console.log( shape );
+
 		for(var i=0; i<shape.x.length; i++){
-			var cell = table.rows[ shape.x[i] ].cells[ shape.y[i] ];
+			var cell = level.rows[ shape.x[i] ].cells[ shape.y[i] ];
 			if(cell == null) continue;
 			
 			cell.style.backgroundColor = color;	
@@ -195,7 +208,7 @@
 		// put the <tbody> in the <table> and appends into <body>
 		tbl.appendChild(tblBody);
 		body.appendChild(tbl);
-		tbl.setAttribute("border", "2");
+		//tbl.setAttribute("border", "2");
 		
 		return tbl;
 	}

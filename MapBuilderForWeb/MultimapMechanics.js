@@ -16,6 +16,11 @@
 		initializeMapEditorGrid(x, y);
 		ResetCutsMap();
 	}
+	
+	function ResetCutsMap(){
+		rows(nrows);
+		cols(ncols);
+	}
 
 	function AskForReset(){
 		let coordenates = OccupancyMapToCoordenates(occupancyMap);

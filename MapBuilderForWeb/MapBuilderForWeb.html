@@ -29,7 +29,7 @@
 		</table>
 	
 
-		<div id="statsGraphics"><div class='stats'><span id='topValue'></span><br><span>Item Type: </span><span id='itemType'>0</span><br><span>Rotation: </span><span id='rotation'>0</span><br><div ><span>Coordenate: </span><span id='positionX'>0</span> , <span id='positionY'>0</span></div></div></div>
+		<div id="statsGraphics"><div class='stats'><span id='topValue'></span><br><span>Item Type: </span><span id='itemType'>0</span><br><span>Level: </span><span id='level'>0,0</span><br><span>Rotation: </span><span id='rotation'>0</span><br><div ><span>Coordenate: </span><span id='positionX'>0</span> , <span id='positionY'>0</span></div></div></div>
 		
     </body>
     <script>
@@ -82,19 +82,19 @@
 			//Both share same stuff
 			initializeMapEditorStatistics();
 			initializeMapEditorShapes();
-			initailizeKeyCombos();
+			//initailizeKeyCombos();
 
 			//Initialize Map editor
-			initializeMapEditorGrid(20, 40);
+			initializeMapEditorGrid(25, 60);
 			initializeMapEditorMenu();
 			
 			//Initialize Shapes editor
 			initializeShapesEditorGrid(10, 10);
 			initializeShapesEditorMenu();
 			
-			document.addEventListener('dragstart', (e) => {
+			/*document.addEventListener('dragstart', (e) => {
 			  e.preventDefault()
-			})
+			})*/
 			
 			//Starts showing map editor while hidning shapes editor
 			GoToMapEditor();
@@ -106,30 +106,55 @@
         }
 		
 
-		
+		var gridRows = 1;
+		var gridCols = 1;
+		var gridSize = {x:20, y:40};
+		var shapesGridSize = {x:10, y:10};
+		var levels = new Array();
+		var gridMap;
+
+		var occupancyMaps =  new Array();
+
 		function initializeMapEditorGrid(x, y){
-			//Creates grid
-			let placingLcation = document.getElementById("GridGraphics");			
-            table = generate_table(x, y);
-			table.id = "grid";
-			table.className = "gridMap";
-			
-			//Places grid 
-			placingLcation.appendChild(table);
-			
-			//Initializes grid logic
-			occupancyMap = Array(x).fill(null).map(()=>Array(y).fill(false));
-			cutsMap = Array(x).fill(null).map(()=>Array(y).fill(false));
-			
-			//Add functionality to the grid
-			var tablerowscount=table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
-			for (let i=0; i<tablerowscount.length; i++) {
-				//console.log(tablerowscount[i].cells);
-				AddHoverListenerToElements(tablerowscount[i].cells);
+			//Updates size
+			if(x != null){
+				gridSize.x = x;
+				gridSize.y = y;
 			}
+
+			//Creates levels holder (map)
+			let placingLcation = document.getElementById("GridGraphics");	
+			gridMap = generate_table( gridRows, gridCols, 5);
+			gridMap.id = "gridMap";
+
+			for (let r=0; r<gridRows; r++) {
+				for (let c=0; c<gridCols; c++) {
+
+					//Creates level
+					let level = generate_table( gridSize.x, gridSize.y, 7 );
+					level.className = "gridLevel";
+					gridMap.rows[r].cells[c].appendChild( level );
+
+					//Starts level logic
+					if( occupancyMaps[r] == null ) occupancyMaps[r] = new Array();
+					occupancyMaps[r][c] = Array( gridSize.x ).fill(null).map(()=>Array( gridSize.y ).fill(false));
+		
+					//Add functionality to the level
+					var tablerows = level.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+					for (let i=0; i<tablerows.length; i++) {
+						AddHoverListenerToElements(tablerows[i].cells, function(){return {x:r, y:c}});
+					}				
+				
+					if( levels[r] == null ) levels[r] = new Array();
+					levels[r][c] = level;
+				}
+			}
+
+			//Places grids
+			placingLcation.appendChild( gridMap );
 			
-            AddClickListenerToElement(table, OnGridClick );
-			AddListenerToScrollWheel(table);
+            AddClickListenerToElement(gridMap, OnGridClick );
+			AddListenerToScrollWheel( gridMap );
 			document.addEventListener('mouseup', function(e) { isClicking = false; });
 		}
 		
@@ -147,6 +172,7 @@
             rotation = document.getElementById('rotation');
             positionX = document.getElementById('positionX');
             positionY = document.getElementById('positionY');
+            levelElement = document.getElementById('level');
 		}
 		
 		function initializeMapEditorShapes(shapeStartIndex=0){
@@ -200,10 +226,16 @@
 			ChangeItem(shapeStartIndex);
 		}
 		
-		function initializeShapesEditorGrid(x, y){			
+		function initializeShapesEditorGrid(x, y){
+			
+			if(x != null){
+				shapesGridSize.x = x;
+				shapesGridSize.y = y;
+			}
+
 			//Creates grid
 			let placingLcation = document.getElementById("GridGraphics");
-            tableShapes = generate_table(x, y);
+            tableShapes = generate_table(shapesGridSize.x, shapesGridSize.y);
 			tableShapes.id = "shapeMap";
 			tableShapes.className = "shapeMap";
 			
@@ -220,13 +252,13 @@
 			placingLcation.appendChild(tableShapes);
 			
 			//Initializes grid logic
-			shapeMap = Array(x).fill(null).map(()=>Array(y).fill(false));
+			shapeMap = Array(shapesGridSize.x).fill(null).map(()=>Array(shapesGridSize.y).fill(false));
 			
 			//Add functionality to the grid
 			var tablerowscount=tableShapes.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
 			for (let i=0; i<tablerowscount.length; i++) {
 				//console.log(tablerowscount[i].cells);
-				AddHoverListenerToElements(tablerowscount[i].cells);
+				AddHoverListenerToElements(tablerowscount[i].cells, function(){return {x:0,y:0}});
 			}
 			AddClickListenerToElement(tableShapes, OnShapesGridClick);
 		}
@@ -243,55 +275,53 @@
 		
 		function ResetMap(){
 			ResetOccupancyMap();
-			ResetCutsMap();
+			//ResetCutsMap();
 		}
 
 		function ResetOccupancyMap(){
-			let formatedCoordenates = OccupancyMapToCoordenates(occupancyMap);
-			printVisualsOfCoordenates(formatedCoordenates, clearedGridColor);
-			
+
+			for (let r=0; r<gridRows; r++) {
+				for (let c=0; c<gridCols; c++) {
+					let occupancyMap = occupancyMaps[r][c];
+					let level = levels[r][c];
+					let formatedCoordenates = OccupancyMapToCoordenates(occupancyMap);
+					printVisualsOfCoordenates(formatedCoordenates, clearedGridColor, level);
+
+					occupancyMaps[r][c] = Array(gridSize.x).fill(null).map(()=>Array(gridSize.y).fill(false));
+				}
+			}
+
 			historyOfPlacements = null;
 			historyOfPlacements = [];
 			historyIndex = 0;
-			
-			let mapLengthX = occupancyMap.length;
-			let mapLengthY = occupancyMap[0].length;
-			
-			occupancyMap = Array(mapLengthX).fill(null).map(()=>Array(mapLengthY).fill(false));
-			
-			//Reset cuts in map. See MultimapMechanics.js for more info
 		}
 
-		function ResetCutsMap(){
-			rows(nrows);
-			cols(ncols);
-		}
+
 		
 		function HideMapEditor(){
-			table.style.display = "none";
+			gridMap.style.display = "none";
 			let lateralButtons = document.getElementsByClassName("control")[0];
 			lateralButtons.style.display = "none";
 		}
 		
 		
-        function OnGridClickAndDrag(x, y){
-			UpdateItemPlacingInfo(x, y);
+        function OnGridClickAndDrag(){
+			UpdateItemPlacingInfo();
 			state = GetOccupancyOfPlacingInfo();
+
+			console.log(state)
 
 			if (state == FREE){
 				PlaceCurrentItemInfo();
 			}		
 		}
 		
-        function OnGridClick(x, y){
+        function OnGridClick(){
 			//OCCUPIED happens when you click directly over a shape in the map
 			//OBSTRUCTED happens when you try to place a shape and indiretctly is being blocked by another
 			//FREE is space availabe
 			
-			//Resets Ctrl+Z actions
-			chainedUndoneIndex = 0;
-			
-			UpdateItemPlacingInfo(x, y);
+			UpdateItemPlacingInfo();
 			state = GetOccupancyOfPlacingInfo();
 			
 			if ( state == OUT_OF_BOUNDS){
@@ -308,13 +338,16 @@
 			else if (state == MAP_CUT){
 				//console.log("MAP_CUT");
 			}
-			else if (state == FREE){
-				//console.log("FREE");
+			else if (state == MAP_CUT){
+				//console.log("MAP_CUT");
+			}
+			else if (state == NULL){
+				//console.log("NULL");
 				PlaceCurrentItemInfo();
 			}
         }
 		
-		function UpdateItemPlacingInfo(x, y){
+		function UpdateItemPlacingInfo(){
 			//Sooo. i know is confusing but here goes:
 			// 1. Average volume of an object is its center position. Not the bounding box center
 			// 2. Here changes the index-position for the center-volume-position of the object so it visualy rotates from its center
@@ -323,10 +356,8 @@
 			// 5. Summary; internally we're using (row,col) as original detection of coordenates. Volume-center to place the visuals. And standar (x,y) as output
 
 			//Creates an object {[x],[y]} where x and y are integrers
-			let clickedCoordenate = new Vector2Array(x, y);
-			currentItemPlacingInfo.positionX = x;
-			currentItemPlacingInfo.positionY = y;
-			
+			let clickedCoordenate = new Vector2Array(currentItemPlacingInfo.positionX, currentItemPlacingInfo.positionY);
+
 			//Finds info 
 			let shape = listOfShapes[currentItemPlacingInfo.itemType];
 			let shapeRotated = RotateCoordenatesByAngle(shape, currentItemPlacingInfo.rotation);
@@ -351,7 +382,7 @@
 		
 		function PlaceCurrentItemInfo(){
 			//Standar (x,y) system for ouputting
-			let minValues = GetMinValuesOfCoordenates(currentItemPlacingInfo.coordenates)
+			let minValues = GetMinValuesOfCoordenates(currentItemPlacingInfo.coordenates);
 			currentItemPlacingInfo.positionX = minValues.x;
 			currentItemPlacingInfo.positionY = minValues.y;
 			
@@ -385,7 +416,7 @@
 				outputData = JSON.stringify( formatCoordenates() );
 			else
 				outputData = FormatOutput();
-				
+
 			let ouputShapes = formatShapes();
 			
 			//console.log("DOWNLOADED:");

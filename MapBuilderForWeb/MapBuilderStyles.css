@@ -35,30 +35,28 @@
 		--delete-icon: #DCDCAA;
 	}
 
+	html {
+		zoom: 150%;
+	}
 
 	tr, td {
 		padding: 0.6rem;
-		border: 1px dashed var(--light-gray);
-		background-color: var(--white);
 		vertical-align: top;
 		cursor: pointer;
 	}
 	table {
 		border: 0px;
-		border-radius: 3px;
+		border-radius: 5px;
 		border-collapse: collapse;
 		margin:2px;
-		box-shadow: 0px 0px 15px var(--table-shadow);
 
 		font-size: 1rem;
 		font-weight: bold;
-		color: var(--white);
 	}
 	
 	.layout{
 		background-color: var(--background);
 		padding: 5px;
-		border: 1px dashed var(--background);
 	}
 
 	body {
@@ -73,36 +71,49 @@
 		margin-right: 20px;
 		cursor: pointer;
 		box-shadow: none;
-		border-radius: 3px;
+		border-radius: 5px;
 		transition: 0.1s ease-in-out;
+		color: var(--white);
 	}	
 		.item:hover {
 			box-shadow: 0px 0px 15px var(--item-click);
 			transform: scale(1.1);
 			transition: 0.1s ease-in-out;
 		}
-	
+		.item td, .item tr{
+			background-color: var(--white);
+			border: 1px dashed var(--light-gray);
+		}
+
+	.gridLevel td, .gridLevel tr{
+		background-color: var(--white);
+		border: 1px dashed var(--light-gray);
+	}
 	
 	.stats {
 		position: absolute;
-		left: 20px;
-		bottom: 40px;
+		text-align: right;
+		right: 100px;
+		bottom: 20px;
 		color: gray;
 	}
 	
 	#lateralMenuGraphics {
 		background-color: var(--lateral-menu-background);
 		box-shadow: 0px 0px 5px var(--lateral-menu-background);
-		min-height: 423px;
+		min-height: 400px;
 		cursor: default;
 		width: 290px;
+		border-radius: 5px;
 	}
 	#itemsArea {
 		height: 190px;
 		cursor: default;
 		overflow-x: auto;
 		max-width: 1236px;
-	
+		background-color: var(--lateral-menu-background);
+		border-radius: 5px;
+
 		display: flex;
 		align-items: center;
 	}
@@ -114,9 +125,18 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		background-color: var(--lateral-menu-background);
+		border-radius: 5px;
+	}
+
+	#gridMap{
+		background-color: var(--lateral-menu-background);
 	}
 	
-	
+	.shapeMap tr, .shapeMap td{
+		background-color: var(--white);
+		border: 1px dashed var(--light-gray);
+	}
 	
 	.addShapeButton{
 		background-color: var(--white);
@@ -152,7 +172,7 @@
 		width: 270px;
 		height: 90px;
 		background-color: var(--side-button);
-		/*border: 5px dashed var(--lateral-menu-background);*/
+		border-radius: 5px;
 		
 		font-size: 2rem;
 		font-weight: bold;
@@ -180,6 +200,7 @@
 		font-weight: bolder;
 		font-size: x-large;
 		width: 211px;
+		border-radius: 5px;
 	}
 		.inputName:hover {
 			background-color: var(--item-hover);
