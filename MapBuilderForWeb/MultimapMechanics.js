@@ -32,7 +32,11 @@
 	function AskForReset(message=""){
 		for(let r=0; r<occupancyMaps.length; r++){
 			for(let c=0; c<occupancyMaps[0].length; c++){
+				
 				let coordenates = OccupancyMapToCoordenates(occupancyMaps[r][c]);
+				if( coordenates == null)
+					continue;
+				
 				if( coordenates.x.length != 0 && (confirm(message + " Requires a reset. Continue?") == false) ){
 					return DONT_RESET;
 				}
@@ -41,45 +45,26 @@
 		return RESET;
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	function FormatOutput(){
-		const numberOfInstructions = historyOfPlacements.length;
-
-		const mapLengthRows = occupancyMap.length;
-		const mapLengthCols = occupancyMap[0].length;
-
-		//Not considenring the space occupied for map cuts
-		const availableRows = mapLengthRows-(nrows-1);
-		const availableCols = mapLengthCols-(ncols-1);
+	
+	const AUTO_LOC = 0;
+	const ALWAYS_LOC = 1;
+	const NEVER_LOC = 2;
+	var localizeOutput = AUTO_LOC;
+	
+	function formatHistoryData(){
+		//Localize if there's only one map in auto mode
+		let localize;
+		switch(localizeOutput){
+			case AUTO_LOC:  localize = (gridRows==1 && gridCols == 1); break;
+			case ALWAYS_LOC: localize = true; break;
+			case NEVER_LOC: localize = false; break;
+		}
 		
-		//Number of rows, cols of each island and its residue due map size
-		const islandSizeRows =  Math.floor( availableRows/nrows );
-		const islandSizeCols =  Math.floor( availableCols/ncols );
-		const residueRows =  availableRows % nrows;
-		const residueCols =  availableCols % ncols;
-
+	
+		const numberOfInstructions = historyOfPlacements.length;
 		let outputData = new Array();
-
+		
+		// Get all data from history
 		for(var i=0; i<numberOfInstructions; i++){
 		
 			//Skip the search if it was marked as deleted
@@ -87,94 +72,60 @@
 				continue;
 			}
 			
-			//PositionsX and positionsY are not always a part of the item.
-			let row = historyOfPlacements[i].coordenates.x[0];
-			let col = historyOfPlacements[i].coordenates.y[0];
-
-			for(var r=0; r<nrows; r++){
-				for(var c=0; c<ncols; c++){
-					
-					//Make all maps including empty ones
-					if(outputData[r] == null){
-						outputData[r] = new Array();
-					}
-					if(outputData[r][c] == null){
-						outputData[r][c] = new OutputData();
-					}
-
-					//console.log("r,c from: "+(islandSizeRows+1)*r + "," + (islandSizeCols+1)*c);
-					//console.log("r,c to:   " + ((islandSizeRows+1)*(r+1)-1) + "," + ((islandSizeCols+1)*(c+1)-1) );
-					//console.log("--------------------------------------------");
-					
-					//To find previous and next rows of current point
-					let prevRow = (islandSizeRows+1)*r;
-					let prevCol = (islandSizeCols+1)*c;
-
-					let nextRow = ((islandSizeRows+1)*(r+1)-1);
-					let nextCol = ((islandSizeCols+1)*(c+1)-1);
-
-					//To find point even if the map was not sliced evenly
-					if(c >= ncols-1){
-						nextCol += residueCols;
-					}
-					if(r >= nrows-1){
-						nextRow += residueRows;
-					}
-
-					//Localizating current item by looking at previous and next rows and cols
-					if( row>=prevRow && row<=nextRow && col>=prevCol  && col<=nextCol ){
-						console.log("Found type: " + listOfShapeNames[ historyOfPlacements[i].itemType ] + " in ("+ r +","+c+") island");
-						
-						//add info on its respective map
-						outputData[r][c].itemTypes.push(historyOfPlacements[i].itemType);
-						outputData[r][c].itemRotations.push(historyOfPlacements[i].rotation);
-						outputData[r][c].positionsX.push(historyOfPlacements[i].positionX);
-						outputData[r][c].positionsY.push(historyOfPlacements[i].positionY);
-						
-					}
-				}
+			//In which level was this item placed
+			let r = historyOfPlacements[i].level.x;
+			let c = historyOfPlacements[i].level.y;
+			
+			//Make all levels that has an item in history
+			if(outputData[r] == null){
+				outputData[r] = new Array();
 			}
+			if(outputData[r][c] == null){
+				outputData[r][c] = new OutputData();
+			}
+			
+			//add info on its respective map
+			outputData[r][c].itemTypes.push(historyOfPlacements[i].itemType);
+			outputData[r][c].itemRotations.push(historyOfPlacements[i].rotation);
+			outputData[r][c].positionsX.push(historyOfPlacements[i].positionX);
+			outputData[r][c].positionsY.push(historyOfPlacements[i].positionY);
 		}
-
+		
 		//return outputData;
-
-		//Stringify output of each map
+		
+		//Format coordenates and stringify each level
 		let outString = "";
-		for(var r=0; r<nrows; r++){
-			for(var c=0; c<ncols; c++){
+		for(var r=0; r<gridRows; r++){
+			for(var c=0; c<gridCols; c++){
+				
+				//Skip empty maps
+				if(outputData[r] == null) continue;
 				
 				//Coordenates are not formated, so extract, reformat and reassign
 				let formatedCoordenates = new Vector2Array( outputData[r][c].positionsX, outputData[r][c].positionsY );
 				
-				//Origin is the top left corner of given [r][c] map
-				let originRows = (islandSizeRows+1) * r;
-				let originCols = (islandSizeCols+1) * c;
+				//Localized coordenates are just the minimum size in which the whole level fits
+				let rotatedCoordenates;
+				if(localize){
+					let data = outputData[r][c].generateFromMap( occupancyMaps[r][c] );
+					
+					//Rotates in local space
+					rotatedCoordenates = LocalizeCoordenates(formatedCoordenates);
+					rotatedCoordenates = RotateCoordenates90Clockwise(rotatedCoordenates);
+				}
+				else{
+					//Switch axis from (rwo,col) to (x,y). To rotate all points in a fixed area is needed a reference to the highest point in rows axis, which is size-1
+					rotatedCoordenates = RotatePerfect( formatedCoordenates, gridSize.x-1 );
+					
+					//Switched map dimentions to match with the (x,y) system
+					outputData[r][c].mapSizeX = gridSize.y;
+					outputData[r][c].mapSizeY = gridSize.x;
+				}
 				
-				//Reference each points in map from its local origin
-				let globalizedCoordenates = GlobalizeCoordenates( formatedCoordenates, -originRows,  -originCols);
-				
-				//Switch axis from (rwo,col) to (x,y). To rotate all points in a fixed area is needed a reference to the highest point in rows axis, which is size-1
-				let rotatedCoordenates = RotatePerfect( globalizedCoordenates, islandSizeRows-1 );
-
 				//Coordenates are formated and sent back to output data
 				outputData[r][c].positionsX = rotatedCoordenates.x;
 				outputData[r][c].positionsY = rotatedCoordenates.y;
 
-				//Switched map dimentions to match with the (x,y) system
-				let mapSizeX = islandSizeCols;
-				let mapSizeY = islandSizeRows;
-
-				//If the map was not sliced evenly, compenzate residues in last row and col
-				if(c >= ncols-1){
-					mapSizeX += residueCols;
-				}
-				if(r >= nrows-1){
-					mapSizeY += residueRows;
-				}
-
-				//Apply map size
-				outputData[r][c].mapSizeX = mapSizeX;
-				outputData[r][c].mapSizeY = mapSizeY;
 
 				//Map name is its position
 				outputData[r][c].mapName = "Level " + r + ", " + c;
@@ -190,4 +141,6 @@
 		return outString;
 	}
 
-	
+
+
+

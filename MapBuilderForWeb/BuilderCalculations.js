@@ -1,24 +1,9 @@
 
 
-        function DictionaryToVector2(dictionary){
-			let arrayX = [];
-			let arrayY = [];
-			
-            for(let i=0; i<Object.keys(dictionary).length; i++){
-                arrayX[i] = dictionary[ Object.keys(dictionary)[i] ].x;
-                arrayY[i] = dictionary[ Object.keys(dictionary)[i] ].y;
-            }
-			
-            console.log("VECTOR TO DOUBLE ARRAY: ");
-            console.log(arrayX)
-            console.log(arrayY)
-			
-			return new Vector2Array(arrayX, arrayY);
-		}
-	   
+		
 		function OccupancyMapToCoordenates(occupancyMap){
-			if(occupancyMap == null) return;	
-
+			if(occupancyMap == null) return;
+			
 			let coordenates = new Vector2Array();
 			let k = 0;
 			let mapLengthX = occupancyMap.length;
@@ -36,11 +21,11 @@
 			
 			return coordenates;
 		}
-
+		
         function LocalizeCoordenates(vector2){
             var minX = 999;
             var minY = 999;
-
+			
             for(var i=0; i<vector2.x.length; i++){
                 if(vector2.x[i] < minX){
                     minX = vector2.x[i];
@@ -49,22 +34,22 @@
                     minY = vector2.y[i];
                 }
            }
-
+			
             for(var i=0; i<vector2.x.length; i++){
                 vector2.x[i] -= minX;
                 vector2.y[i] -= minY;
             }
-
+			
             console.log("LOCALIZED TO MIN VALUE: ");
             console.log("minX " + minX + "; minY " + minY);
             console.log(vector2);
-
+			
 			return vector2;
         }
 		
 		function GlobalizeCoordenates(shape, x, y){			
 			let coordenatesa = new Vector2Array(shape);
-
+			
 			for(let i=0; i<shape.x.length; i++){
                 coordenatesa.x[i] += x;
                 coordenatesa.y[i] += y;
@@ -102,7 +87,7 @@
 		function RotatePerfect(vector2, maxX){
 			var tempX = vector2.x;
 			vector2.x = vector2.y;
-
+			
             for(var i=0; i<vector2.x.length; i++){
                 tempX[i] = maxX - tempX[i];
             }
@@ -110,7 +95,7 @@
 			
 			return vector2;
 		} 
-
+		
         function RotateCoordenates90Clockwise(vector2){
 			
             //Flip axis. This actually mirors coordenates by 45 degrees
@@ -119,12 +104,12 @@
 				var switchReg = vector2.x[i];
                 vector2.x[i] = vector2.y[i];
                 vector2.y[i] = switchReg;
-
+				
                 if(vector2.y[i] > maxY){
                     maxY =  vector2.y[i];
                 }
             }
-
+			
             //Miror y axis. Both instructions actually rotate the coordenates 90° counteclockwise
             // and that can be seen as switching from row-cols system to x-y cartesian system
             for(var i=0; i<vector2.x.length; i++){
@@ -154,7 +139,7 @@
 	   }
 	   
 	   function GetMinValuesOfCoordenates(coordenates){
-		   let minValue = {x:0, y:99};
+		   let minValue = {x:0, y:999};
 		   
 		   for( let i=0; i<coordenates.x.length; i++ ){
 			   if(coordenates.x[i] > minValue.x){
@@ -166,6 +151,21 @@
 		   }
 		   
 		   return minValue;
+	   }
+	   
+	   function GetMaxValuesOfCoordenates(coordenates){
+		   let maxValue = {x:0, y:0};
+		   
+		   for( let i=0; i<coordenates.x.length; i++ ){
+			   if(coordenates.x[i] > maxValue.x){
+				   maxValue.x = coordenates.x[i];
+			   }
+			   if(coordenates.y[i] > maxValue.y){
+				   maxValue.y = coordenates.y[i];
+			   }
+		   }
+		   
+		   return maxValue;
 	   }
 	   
 		function getStatisticsTopValue(val)

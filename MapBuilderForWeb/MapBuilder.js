@@ -203,9 +203,10 @@
 /////////// KEY COMBOS //////////////////////////////////////////////////////////////
 const keyLog = {}
 const handleKeyboard = ({ type, key, repeat, metaKey }) => {
-	if (repeat) return
+	if( repeat ) return;
+	if( isShapeEditorActive ) return;
 
-	if (type === 'keydown') {
+	if( type === 'keydown' ){
 	keyLog[key] = true
 
 	//Create cuts on rows and cols with Ctrl + arrow keys
@@ -326,8 +327,11 @@ function OutputData(){
 	this.mapSizeY = 0;
 	this.mapName = "unnamed";
 
-    this.generateFromHistory = function(){
-		let numberOfInstructions = historyOfPlacements.length;
+    this.generateFromHistory = function( history=historyOfPlacements ){
+		
+		//if(history == null) history = ;
+		
+		let numberOfInstructions = history.length;
 		this.itemTypes = [];
 		this.itemRotations = [];
 		this.positionsX = [];
@@ -338,14 +342,14 @@ function OutputData(){
 		for(var i=0; i<numberOfInstructions; i++){
 		
 			//Skip the search if it was marked as deleted
-			if(historyOfPlacements[i].deleted == true){
+			if(history[i].deleted == true){
 				continue;
 			}
 			
-			this.itemTypes[j] = historyOfPlacements[i].itemType;
-			this.itemRotations[j] = historyOfPlacements[i].rotation;
-			this.positionsX[j] = historyOfPlacements[i].positionX;
-			this.positionsY[j] = historyOfPlacements[i].positionY;
+			this.itemTypes[j] = history[i].itemType;
+			this.itemRotations[j] = history[i].rotation;
+			this.positionsX[j] = history[i].positionX;
+			this.positionsY[j] = history[i].positionY;
 			j++;
 		}
 	}
@@ -380,6 +384,8 @@ function OutputData(){
 
 		this.mapSizeX = maxY - minY + 1;
 		this.mapSizeY = maxX - minX + 1;
+		
+		return {"minX":minX, "maxX":maxX, "minY":minY, "maxY":maxY};
 	}
 
 	
@@ -400,7 +406,7 @@ function Point(x, y){
 		let shapesString = mapsAndShapesString[1].split("&");
 
 		uploadShapes(shapesString);
-		//uploadMaps(mapsString);
+		uploadMaps(mapsString);
 
 		/*console.log(mapsString)
 		console.log(shapesString)
@@ -438,9 +444,6 @@ function Point(x, y){
 
 		// Simplified version with a non cutted map
 		if(mapsString.length == 1){
-			rows(1);
-			cols(1);
-
 			maps = JSON.parse(mapsString[0]);
 			updateMap(maps);
 			return;
@@ -452,9 +455,6 @@ function Point(x, y){
 			maps[i] = JSON.parse(mapsString[i]);
 		}
 
-		let mapSizeX = maps[0].maps.mapSizeX;
-		rows(1);
-		cols(1);
 
 	}
 
