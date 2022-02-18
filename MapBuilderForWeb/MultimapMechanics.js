@@ -1,140 +1,65 @@
 
-	var cutsMap;
-	var nrows=1, ncols=1;
-	
+
+	function resetMap(){
+		if( AskForReset() == DONT_RESET ) return;
+
+		if(gridMap != null){
+			document.getElementById("GridGraphics").removeChild(gridMap);
+			gridMap = null;
+		}
+	}
+
 	function map(x, y){
-		if(x <= 0 || y <= 0) return;
-		
-		if( !AskForReset() ) return;
+		resetMap()
 
-		ResetOccupancyMap();
-
-		if(table != null){
-			document.getElementById("GridGraphics").removeChild(table);
-			table = null;
-		}
-		initializeMapEditorGrid(x, y);
-		ResetCutsMap();
+		gridSize.x =  Math.max(1, x);
+		gridSize.y =  Math.max(1, y);
+		initializeMapEditorGrid( gridSize.x, gridSize.y );
 	}
 	
-	function ResetCutsMap(){
-		rows(nrows);
-		cols(ncols);
+	function rows(nrows){
+		gridRows = Math.max(1, nrows);
+		map(gridSize.x, gridSize.y);
+	}
+	 
+	function cols(ncols){
+		gridCols = Math.max(1, ncols);
+		map(gridSize.x, gridSize.y);
 	}
 
-	function AskForReset(){
-		let coordenates = OccupancyMapToCoordenates(occupancyMap);
-		if( (coordenates.x.length != 0) && (confirm("Requires a reset. Continue?") == false) )
-			return false;
-	
-		return true;
-	}
-
-	function rows(numberOfRows){
-		if( !AskForReset() ) return;
-
-		ResetOccupancyMap();
-		if(table != null){
-			document.getElementById("GridGraphics").removeChild(table);
-			table = null;
-		}
-		initializeMapEditorGrid(occupancyMap.length, occupancyMap[0].length);
-
-		let maxRows = Math.round( occupancyMap.length/2 );
-		if(numberOfRows <= 0){
-			console.log("Applied minimum (1) instead");
-			numberOfRows = 1;
-		}
-		if(numberOfRows > maxRows){
-			console.log("Applied maximum ("+maxRows+") instead");
-			numberOfRows = maxRows;
-		}
-		
-		UpdateCutsMap(TARGET_ROWS, nrows, JOIN);
-		UpdateCutsMap(TARGET_ROWS, numberOfRows, CUT);
-		
-		UpdateCutsMap(TARGET_COLS, ncols, CUT);
-		nrows = numberOfRows;
-	}
-	
-	function cols(numberOfCols){
-
-		if( !AskForReset() ) return;
-		ResetOccupancyMap();
-		if(table != null){
-			document.getElementById("GridGraphics").removeChild(table);
-			table = null;
-		}
-		initializeMapEditorGrid(occupancyMap.length, occupancyMap[0].length);
-
-		let maxCols = Math.round( occupancyMap[0].length/2 );
-		if(numberOfCols <= 0){
-			console.log("Applied minimum (1) instead");
-			numberOfCols = 1;
-		}
-		if(numberOfCols > maxCols){
-			console.log("Applied maximum ("+maxCols+") instead");
-			numberOfCols = maxCols;
-		}
-		
-		UpdateCutsMap(TARGET_COLS, ncols, JOIN);
-		UpdateCutsMap(TARGET_COLS, numberOfCols, CUT);
-		
-		UpdateCutsMap(TARGET_ROWS, nrows, CUT);
-		ncols = numberOfCols;
-	}
-
-	const TARGET_ROWS = true;
-	const TARGET_COLS = false;
-	const CUT = true;
-	const JOIN = false;
-	
-	function UpdateCutsMap(target, numberOfSuch, state){
-		let x, y;
-		let mapLengthB, mapLengthA;
-		let nSuch;
-
-		if(target == TARGET_ROWS){
-			mapLengthA = occupancyMap.length;
-			mapLengthB = occupancyMap[0].length;
-			nSuch = nrows;
-		}
-		else{
-			mapLengthB = occupancyMap.length;
-			mapLengthA = occupancyMap[0].length;
-			nSuch = ncols;
-		}
-
-		const available = mapLengthA-(nSuch-1);
-		const islandSize = available / numberOfSuch;
-		const islandSizeWithCut = islandSize + 1;
-		const increment = Math.floor( islandSizeWithCut );
-		
-		for(let i=0; i<numberOfSuch-1; i++){
-			for(let j=0; j<mapLengthB; j++){
-				if(target == TARGET_ROWS){
-					y = j;
-					x = increment*(i+1)-1;
-				}
-				else{
-					x = j;
-					y = increment*(i+1)-1;
-				}
-				
-				if(state == CUT){
-					printVisualsOfCoordenates(new Vector2Array(x, y), mapCutColor);
-					cutsMap[x][y] = true;
-					occupancyMap[x][y] = null;
-				}
-				else{
-					printVisualsOfCoordenates(new Vector2Array(x, y), clearedGridColor);
-					cutsMap[x][y] = false;
-					occupancyMap[x][y] = FREE;
+	const RESET = true;
+	const DONT_RESET = false;
+	function AskForReset(message=""){
+		for(let r=0; r<occupancyMaps.length; r++){
+			for(let c=0; c<occupancyMaps[0].length; c++){
+				let coordenates = OccupancyMapToCoordenates(occupancyMaps[r][c]);
+				if( coordenates.x.length != 0 && (confirm(message + " Requires a reset. Continue?") == false) ){
+					return DONT_RESET;
 				}
 			}
 		}
+		return RESET;
 	}
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 	function FormatOutput(){

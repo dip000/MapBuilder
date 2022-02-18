@@ -10,7 +10,7 @@
   		--lighter: #B9F51B;
 		*/
 
-		/* VISUAL STUDIO PALETTE
+		--TITLE: VISUAL STUDIO PALETTE;
 		--blue: #569CD6;
 		--light-blue: #9CDCFE;
 		--green: #57A64A;
@@ -18,21 +18,21 @@
 		--yellow: #DCDCAA;
 		--pink: #D8A0D1;
 		--orange: #D69D85;
-		*/
+		
 		
   		--background: #1E1E1E;
   		--table-shadow: #111111;
-  		--item-hover: #D69D85;
-  		--item-shadow: #D69D85;
-  		--item-click: #D69D85;
+  		--item-hover: #D8A0D1;
+  		--item-shadow: #D8A0D1;
+  		--item-click: #D8A0D1;
   		--lateral-menu-background: #353535;
-  		--side-button: #D8A0D1;
-  		--side-button-hover: #D69D85;
-  		--download-button: #D8A0D1;
-  		--download-button-hover: #D69D85;
+  		--side-button: #D69D85;
+  		--side-button-hover: #D8A0D1;
+  		--download-button: #D69D85;
+  		--download-button-hover: #D8A0D1;
 		--white:#ffffff;
-		--light-gray:#DCDCDC;
-		--delete-icon: #DCDCAA;
+		--light-gray:#302f2f3b;
+		--delete-icon: #D69D85;
 	}
 
 	html {
@@ -68,7 +68,7 @@
 	.items .item{
 		display: inline-block;
 		padding: 5px;
-		margin-right: 20px;
+		margin-left: 20px;
 		cursor: pointer;
 		box-shadow: none;
 		border-radius: 5px;
@@ -93,7 +93,7 @@
 	.stats {
 		position: absolute;
 		text-align: right;
-		right: 100px;
+		right: 45px;
 		bottom: 20px;
 		color: gray;
 	}
@@ -182,6 +182,7 @@
 	}
 		.sideButton:hover {
 		  background-color: var(--side-button-hover);
+		  box-shadow: 0px 0px 10px var(--item-shadow);
 		}
 		
 		.downloadButton{
@@ -190,6 +191,7 @@
 	
 		.downloadButton:hover {
 		  background-color: var(--download-button-hover);
+		  box-shadow: 0px 0px 10px var(--item-shadow);
 		}
 		
 	.inputName {

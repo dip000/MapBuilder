@@ -26,7 +26,7 @@
 					if(isShapeEditorActive)
 						PlaceDotAtPoint(currentItemPlacingInfo.positionX, currentItemPlacingInfo.positionY);
 					else{
-						OnGridClickAndDrag(currentItemPlacingInfo.positionX, currentItemPlacingInfo.positionY);
+						OnGridClickAndDrag();
 					}
 				}
 				
@@ -44,15 +44,13 @@
 
 	function AddClickListenerToElement(element, callback){
 		element.addEventListener('mousedown', function(e) {
-			//console.log("Clicked at: " + e.target.parentElement.rowIndex + "," + e.target.cellIndex);
-			let x = e.target.parentElement.rowIndex;
-			let y = e.target.cellIndex;
 			topValue.innerHTML = getStatisticsTopValue(value);
 			
 			isClicking = true;
 
-			if(x == null || y == null) return;
-			callback(x, y);
+			if(currentItemPlacingInfo.positionX == null || currentItemPlacingInfo.positionY == null) return;
+			
+			callback();
 		   
 		}, false);     
 	}

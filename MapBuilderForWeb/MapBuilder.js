@@ -73,19 +73,6 @@
 			historyOfPlacements[itemPlacingInfo.indexInHistory].undoFromHistory();
 		}
 		
-		function UndoActionFromHistory(itemPlacingInfo){
-			if(itemPlacingInfo == null) return;
-		
-			itemPlacingInfo.deleted = ! (itemPlacingInfo.deleted);
-			
-			if(itemPlacingInfo.deleted == true){
-				return ActionTypes.deleted;
-			}
-			else{
-				return ActionTypes.replaced;
-			}
-		}
-
 		function GetInformationFromHistoryIndex(index){
 			if(index < 0) return null;
 			if(index > historyOfPlacements.length-1) return null;
@@ -211,54 +198,9 @@
 
             document.body.removeChild(element);
         }
-/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
 
-
-//UNDO MECHANICS  ////////////////////////////////////////////////////////
-		/*document.onkeyup = function(e) {
-			//Ctrl+Z  is  Undo
-			if( e.ctrlKey && e.which == 90 && !e.shiftKey){
-				UndoAction(-1);
-			}
-			//Ctrl+Y  is Redo
-			else if( e.ctrlKey && e.which == 89 ){
-				UndoAction(1);
-			}
-			//Ctrl+Shift+Z is Redo as well
-			else if( e.ctrlKey && e.shiftKey && e.which == 90 ){
-				UndoAction(1);
-			}
-		};
-		
-		const ActionTypes = Object.freeze({
-		  deleted: 0,
-		  replaced: 1
-		});
-		
-		var chainedUndoneIndex = 0;
-		function UndoAction(direction){
-			//Test input
-			let test = chainedUndoneIndex + direction + historyIndex;
-			if(test > historyIndex || test < 0 ) return;	
-			chainedUndoneIndex += direction;
-			//console.log("Undone direction: " + direction + "; undone index: " + chainedUndoneIndex + "; global position: " + (historyIndex + chainedUndoneIndex))
-			
-			let itemPlacingInfo = GetInformationFromHistoryIndex(historyIndex + chainedUndoneIndex);
-			if(itemPlacingInfo == null) return;
-			
-			let actionResult = UndoActionFromHistory(itemPlacingInfo);
-			
-			if(actionResult == ActionTypes.deleted){
-				printVisualsOfCoordenates(itemPlacingInfo.coordenates, clearedGridColor);
-				UpdateOccupancy(itemPlacingInfo.coordenates, FREE);
-			}
-			else{
-				printVisualsOfCoordenates(itemPlacingInfo.coordenates, itemPlacedColor);
-				UpdateOccupancy(itemPlacingInfo.coordenates, OCCUPIED);
-			}
-		}*/
-////////////////////////////////////////////////////////////////////////////////////
-
+/////////// KEY COMBOS //////////////////////////////////////////////////////////////
 const keyLog = {}
 const handleKeyboard = ({ type, key, repeat, metaKey }) => {
 	if (repeat) return
@@ -269,24 +211,24 @@ const handleKeyboard = ({ type, key, repeat, metaKey }) => {
 	//Create cuts on rows and cols with Ctrl + arrow keys
 	if(keyLog.Control){
 		if (key === "ArrowLeft")
-			cols(ncols-1);
+			cols(gridCols-1);
 		if (key === "ArrowRight")
-			cols(ncols+1);
+			cols(gridCols+1);
 		if (key === "ArrowDown")
-			rows(nrows-1);
+			rows(gridRows+1);
 		if (key === "ArrowUp")
-			rows(nrows+1);
+			rows(gridRows-1);
 	}
 	else{
 		//Rebuild map rows and cols with arrow keys
 		if (key === "ArrowLeft")
-			map( occupancyMap.length, occupancyMap[0].length-1 );
+			map( gridSize.x, gridSize.y-1 );
 		if (key === "ArrowRight")
-			map( occupancyMap.length, occupancyMap[0].length+1 );
+			map( gridSize.x, gridSize.y+1 );
 		if (key === "ArrowDown")
-			map( occupancyMap.length+1, occupancyMap[0].length );
+			map( gridSize.x+1, gridSize.y );
 		if (key === "ArrowUp")
-			map( occupancyMap.length-1, occupancyMap[0].length );
+			map( gridSize.x-1,gridSize.y );
 	}
 }
 
@@ -303,6 +245,7 @@ function initailizeKeyCombos(){
     events.forEach(name => document.removeEventListener(name, handleKeyboard))
 }
 
+////////////////////////////////////////////////////////////////////////////////////
 
 // TYPES AND CONSTRUCTORS //////////////////////////////////////////////////////////
 function Vector2Array(x, y) {
@@ -328,7 +271,7 @@ function Vector2Array(x, y) {
 		this.y = [];
 	}
 	else{
-		//console.error("Constructor of Vector2Array did not found an overload for input");
+		console.error("Constructor of Vector2Array did not found an overload for input");
 	}
 }
 
@@ -440,6 +383,11 @@ function OutputData(){
 	}
 
 	
+}
+
+function Point(x, y){
+	this.x = x;
+	this.y = y;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////

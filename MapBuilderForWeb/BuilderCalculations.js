@@ -17,6 +17,8 @@
 		}
 	   
 		function OccupancyMapToCoordenates(occupancyMap){
+			if(occupancyMap == null) return;	
+
 			let coordenates = new Vector2Array();
 			let k = 0;
 			let mapLengthX = occupancyMap.length;

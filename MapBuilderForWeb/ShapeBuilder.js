@@ -62,9 +62,10 @@ var isShapeEditorActive = false;
 			ResetShape();
 			//GoToMapEditor();
 		}
-
-		function OnShapesGridClick(x, y){
-			//console.log("OnShapesGridClick stuff happens");
+		
+		function OnShapesGridClick(){
+			x = currentItemPlacingInfo.positionX;
+			y = currentItemPlacingInfo.positionY;
 			
 			if(GetOccupancyOfShapesEditorCoordenates(x, y) == FREE){
 				PlaceDotAtPoint(x, y);	
@@ -81,8 +82,6 @@ var isShapeEditorActive = false;
 		}
 
 		function ResetShape(){
-			let occupancyMap = occupancyMaps[currentItemPlacingInfo.level.x][currentItemPlacingInfo.level.y];
-
 			//console.log("ResetShape stuff happens");
 			let formatedCoordenates = OccupancyMapToCoordenates(shapeMap);
 			for(let i=0; i<formatedCoordenates.x.length; i++){

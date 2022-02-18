@@ -52,7 +52,7 @@
 		const itemShadowColor = "#9CDCFE";
 		const itemPlacedColor = "#569CD6";
 		const clearedGridColor = "white";
-		const itemSelectedColor = "#D69D85";
+		const itemSelectedColor = "#D8A0D1";
 		const itemDefaultColor = "#1E1E1E";
 		const mapCutColor = "#1E1E1E";
 		
@@ -79,10 +79,10 @@
 
 		//Everything starts here
         window.onload = function() {
-			//Both share same stuff
+			//Both editors share these behaviors
 			initializeMapEditorStatistics();
 			initializeMapEditorShapes();
-			//initailizeKeyCombos();
+			initailizeKeyCombos();
 
 			//Initialize Map editor
 			initializeMapEditorGrid(25, 60);
@@ -92,24 +92,20 @@
 			initializeShapesEditorGrid(10, 10);
 			initializeShapesEditorMenu();
 			
-			/*document.addEventListener('dragstart', (e) => {
+			document.addEventListener('dragstart', (e) => {
 			  e.preventDefault()
-			})*/
+			})
 			
 			//Starts showing map editor while hidning shapes editor
 			GoToMapEditor();
 			//GoToShapesEditor();
-
-			//FOR DEBUGGING ONLY
-			//rows(3);
-			//cols(3);
         }
 		
 
 		var gridRows = 1;
 		var gridCols = 1;
-		var gridSize = {x:20, y:40};
-		var shapesGridSize = {x:10, y:10};
+		var gridSize = new Point();
+		var shapesGridSize = new Point();
 		var levels = new Array();
 		var gridMap;
 
@@ -121,7 +117,7 @@
 				gridSize.x = x;
 				gridSize.y = y;
 			}
-
+			
 			//Creates levels holder (map)
 			let placingLcation = document.getElementById("GridGraphics");	
 			gridMap = generate_table( gridRows, gridCols, 5);
@@ -309,8 +305,6 @@
 			UpdateItemPlacingInfo();
 			state = GetOccupancyOfPlacingInfo();
 
-			console.log(state)
-
 			if (state == FREE){
 				PlaceCurrentItemInfo();
 			}		
@@ -338,11 +332,11 @@
 			else if (state == MAP_CUT){
 				//console.log("MAP_CUT");
 			}
-			else if (state == MAP_CUT){
-				//console.log("MAP_CUT");
-			}
 			else if (state == NULL){
 				//console.log("NULL");
+			}
+			else if (state == FREE){
+				//console.log("FREE");
 				PlaceCurrentItemInfo();
 			}
         }
