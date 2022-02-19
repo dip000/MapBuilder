@@ -324,7 +324,6 @@
 			
 			if ( state == OUT_OF_BOUNDS){
 				//console.log("OUT_OF_BOUNDS");
-				return;
 			}
 			else if (state == OCCUPIED){
 				//console.log("OCCUPIED");
@@ -372,6 +371,10 @@
 		
 		function RemoveCurrentItemInfo(){
 			let infoToRemove = FindHistoryInfoAtCurrentPlacement();
+			
+			//console.log("infoToRemove: ");
+			//console.log(new ItemPlacingInfo(infoToRemove));
+			
 			DeleteFromHistoryOfPlacements(infoToRemove);
 			printVisualsOfCoordenates(infoToRemove.coordenates, clearedGridColor);
 			UpdateOccupancy(infoToRemove.coordenates, FREE);
@@ -381,9 +384,16 @@
 		function PlaceCurrentItemInfo(){
 			//Standar (x,y) system for ouputting
 			let minValues = GetMinValuesOfCoordenates(currentItemPlacingInfo.coordenates);
+			
+			currentItemPlacingInfo.x = currentItemPlacingInfo.positionX;
+			currentItemPlacingInfo.y = currentItemPlacingInfo.positionY;
+			
 			currentItemPlacingInfo.positionX = minValues.x;
 			currentItemPlacingInfo.positionY = minValues.y;
 			
+			//console.log("infoToPlace: ");
+			//console.log(new ItemPlacingInfo(currentItemPlacingInfo));
+
 			printVisualsOfCoordenates(currentItemPlacingInfo.coordenates, listOfShapeColors[currentItemPlacingInfo.itemType]);
 			UpdateOccupancy(currentItemPlacingInfo.coordenates, OCCUPIED);
 			RegisterHistoryOfPlacements(currentItemPlacingInfo);

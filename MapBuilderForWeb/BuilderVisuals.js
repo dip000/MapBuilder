@@ -18,6 +18,7 @@
 				levelElement.innerHTML = currentItemPlacingInfo.level.x + ", " + currentItemPlacingInfo.level.y;
 
 				
+
 				printHoverVisuals();
 				printHoverShapeVisuals();
 				
@@ -30,27 +31,24 @@
 					}
 				}
 				
+				
 			
 			}, false);
 		}
 	}
-
-	/*visualsReseteer();
-	function visualsReseteer(){
-		setInterval(function(){
-			printVisualsOfCoordenates( previusCoordenates , clearedGridColor );
-		}, 1000);
-	}*/
-
+	
 	function AddClickListenerToElement(element, callback){
 		element.addEventListener('mousedown', function(e) {
 			topValue.innerHTML = getStatisticsTopValue(value);
+			currentItemPlacingInfo.positionX = e.target.parentElement.rowIndex;
+			currentItemPlacingInfo.positionY = e.target.cellIndex;
 			
 			isClicking = true;
 
 			if(currentItemPlacingInfo.positionX == null || currentItemPlacingInfo.positionY == null) return;
 			
 			callback();
+			//console.log( new ItemPlacingInfo(currentItemPlacingInfo) );
 		   
 		}, false);     
 	}
@@ -80,6 +78,7 @@
 // PRINTERS ////////////////////////////////////////////////////////////////////////
 		
 	var previousLevel;
+	var previousMap;
 	
 	function printHoverVisuals(){		
 		//Read all from current placing info
@@ -94,7 +93,7 @@
 		let coordenates = GlobalizeCoordenates(shapeRotated, volumeIndex.x, volumeIndex.y);
 				
 		coordenates = IgnoreOccupiedCoordenates(coordenates);
-		previusCoordenates = IgnoreOccupiedCoordenates(previusCoordenates);
+		previusCoordenates = IgnoreOccupiedCoordenates(previusCoordenates, previousMap);
 		
 		//console.log(new Vector2Array(coordenates));
 
@@ -103,6 +102,7 @@
 		
 		previusCoordenates = coordenates;
 		previousLevel = levels[ currentItemPlacingInfo.level.x ][ currentItemPlacingInfo.level.y ];
+		previousMap = occupancyMaps[ currentItemPlacingInfo.level.x ][ currentItemPlacingInfo.level.y ];
 	}
 	
 	var _x=0, _y=0;

@@ -171,6 +171,7 @@
 
 		reader.onload = function( event ){
 			upload( event.target.result );
+			document.querySelector('input[type=file]').value = "";
 		}
 		
 		try{ reader.readAsText( file ); } catch{}

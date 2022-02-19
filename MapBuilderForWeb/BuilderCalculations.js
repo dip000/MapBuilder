@@ -40,9 +40,9 @@
                 vector2.y[i] -= minY;
             }
 			
-            console.log("LOCALIZED TO MIN VALUE: ");
+            /*console.log("LOCALIZED TO MIN VALUE: ");
             console.log("minX " + minX + "; minY " + minY);
-            console.log(vector2);
+            console.log(vector2);*/
 			
 			return vector2;
         }

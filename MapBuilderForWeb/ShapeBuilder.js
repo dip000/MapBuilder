@@ -141,31 +141,33 @@ var isShapeEditorActive = false;
 		
 		function RemoveShapeFromMap(shapeIndex){
 			
-			for(var i=0; i<historyOfPlacements.length; i++){
+			for(let i=0; i<historyOfPlacements.length; i++){
 			
 				//Skip the search if it was marked as deleted
 				if(historyOfPlacements[i].deleted == true){
 					continue;
 				}
-				
-				//Item type is the shape index
-				if(historyOfPlacements[i].itemType == shapeIndex){
-					
-					for (let r=0; r<gridRows; r++) {
-						for (let c=0; c<gridCols; c++) {
-							let occupancyMap = occupancyMaps[r][c];
-							let level = levels[r][c];
 
-							printVisualsOfCoordenates(historyOfPlacements[i].coordenates, clearedGridColor, level);
-							UpdateOccupancy(historyOfPlacements[i].coordenates, FREE, occupancyMap);
-						}
-					}
+				let history = historyOfPlacements[i];
+				let historyCoordenates = history.coordenates;
+				
+				//find all matching types
+				if(history.itemType == shapeIndex){
 					
-					DeleteFromHistoryOfPlacements( historyOfPlacements[i] );
+					//Delete from its level
+					let r = history.level.x;
+					let c = history.level.y;
+					let occupancyMap = occupancyMaps[r][c];
+					let level = levels[r][c];
+
+					printVisualsOfCoordenates(historyCoordenates, clearedGridColor, level);
+					UpdateOccupancy(historyCoordenates, FREE, occupancyMap);
+					
+					DeleteFromHistoryOfPlacements( history );
 				}
 				//Higher item types must reaccomodate. Lower item types stays the same
-				else if(historyOfPlacements[i].itemType > shapeIndex){
-					historyOfPlacements[i].itemType--;
+				else if(history.itemType > shapeIndex){
+					history.itemType--;
 				}
 			}
 

@@ -90,12 +90,20 @@
 				if(historyOfPlacements[i].deleted == true){
 					continue;
 				}
-				let historyCoordenates = historyOfPlacements[i].coordenates;
+				
+				let history = historyOfPlacements[i];
+				let historyCoordenates = history.coordenates;
+				
+				//Skip placement if it happened in a different level
+				let differentLevelX = (history.level.x != currentItemPlacingInfo.level.x);
+				let differentLevelY = (history.level.y != currentItemPlacingInfo.level.y);
+				if( differentLevelX || differentLevelY ){
+					continue;
+				}
 				
 				for(var j=0; j<historyCoordenates.x.length; j++){
 					let sameCoordenateX = (historyCoordenates.x[j] == currentItemPlacingInfo.positionX);
 					let sameCoordenateY = (historyCoordenates.y[j] == currentItemPlacingInfo.positionY);
-					
 					if(sameCoordenateX && sameCoordenateY){
 						return historyOfPlacements[i];
 					}
@@ -104,7 +112,7 @@
 
 			return null;
 		}
-		
+	
 		function FindHistoryInfoAtPoint(point){
 			for(var i=0; i<historyOfPlacements.length; i++){
 			
@@ -129,12 +137,15 @@
 
 
 
-		function IgnoreOccupiedCoordenates(coordenates){
+		function IgnoreOccupiedCoordenates(coordenates, map){
 			if(coordenates == null) return null;
 			
 			newCoordenates = new Vector2Array();
 			let j=0;
-			let occupancyMap = occupancyMaps[currentItemPlacingInfo.level.x][currentItemPlacingInfo.level.y];
+			
+			let occupancyMap = map;
+			if( occupancyMap == null )
+				occupancyMap = occupancyMaps[currentItemPlacingInfo.level.x][currentItemPlacingInfo.level.y];
 			
 			for(let i=0; i<coordenates.x.length; i++){
 				
@@ -409,6 +420,7 @@ function Point(x, y){
 
 		uploadShapes(shapesString);
 		uploadMaps(mapsString);
+		ChangeItem(0);
 	}
 
 	function uploadShapes(shapesString){
