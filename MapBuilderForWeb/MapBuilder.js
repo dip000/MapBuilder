@@ -55,8 +55,11 @@
 		
 
 		
-		function UpdateOccupancy(coordenates, state){
-			let occupancyMap = occupancyMaps[currentItemPlacingInfo.level.x][currentItemPlacingInfo.level.y];
+		function UpdateOccupancy(coordenates, state, map){
+			let occupancyMap = map;
+			if( occupancyMap == null )
+				occupancyMap = occupancyMaps[currentItemPlacingInfo.level.x][currentItemPlacingInfo.level.y];
+			
 			for(var i=0; i<coordenates.x.length; i++){
 				occupancyMap[coordenates.x[i]][coordenates.y[i]] = state;
 			}		
@@ -406,12 +409,6 @@ function Point(x, y){
 
 		uploadShapes(shapesString);
 		uploadMaps(mapsString);
-
-		/*console.log(mapsString)
-		console.log(shapesString)
-
-		console.log(maps)
-		console.log(shapes)*/
 	}
 
 	function uploadShapes(shapesString){

@@ -165,3 +165,19 @@
 
 
 
+	function showFile(){
+		let file = document.querySelector('input[type=file]').files[0];
+		let reader = new FileReader();
+
+		reader.onload = function( event ){
+			upload( event.target.result );
+		}
+		
+		try{ reader.readAsText( file ); } catch{}
+	}
+	
+	function downloadManager(){
+		document.querySelector('input[type=file]').click();
+	}
+	
+	

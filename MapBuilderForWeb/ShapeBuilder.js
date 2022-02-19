@@ -150,9 +150,18 @@ var isShapeEditorActive = false;
 				
 				//Item type is the shape index
 				if(historyOfPlacements[i].itemType == shapeIndex){
+					
+					for (let r=0; r<gridRows; r++) {
+						for (let c=0; c<gridCols; c++) {
+							let occupancyMap = occupancyMaps[r][c];
+							let level = levels[r][c];
+
+							printVisualsOfCoordenates(historyOfPlacements[i].coordenates, clearedGridColor, level);
+							UpdateOccupancy(historyOfPlacements[i].coordenates, FREE, occupancyMap);
+						}
+					}
+					
 					DeleteFromHistoryOfPlacements( historyOfPlacements[i] );
-					printVisualsOfCoordenates(historyOfPlacements[i].coordenates, clearedGridColor);
-					UpdateOccupancy(historyOfPlacements[i].coordenates, FREE);
 				}
 				//Higher item types must reaccomodate. Lower item types stays the same
 				else if(historyOfPlacements[i].itemType > shapeIndex){

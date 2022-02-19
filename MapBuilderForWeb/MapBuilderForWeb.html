@@ -10,7 +10,7 @@
 <link rel="stylesheet" type="text/css" href="MapBuilderStyles.css">
 
     <body>
-	
+	<input type="file" onchange="showFile()" style="display:none">
 		<table>
 		<tr>
 			<td colspan="2" class="layout">
@@ -96,6 +96,9 @@
 			  e.preventDefault()
 			})
 			
+			//custom scale to window size
+			document.body.style.zoom = (window.innerWidth*0.07782) + "%";
+			
 			//Starts showing map editor while hidning shapes editor
 			GoToMapEditor();
 			//GoToShapesEditor();
@@ -138,7 +141,7 @@
 					//Add functionality to the level
 					var tablerows = level.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
 					for (let i=0; i<tablerows.length; i++) {
-						AddHoverListenerToElements(tablerows[i].cells, function(){return {x:r, y:c}});
+						AddHoverListenerToElements(tablerows[i].cells, function(){return new Point(r, c)});
 					}				
 				
 					if( levels[r] == null ) levels[r] = new Array();
@@ -158,7 +161,7 @@
 		function initializeMapEditorMenu(){
 			//Creates HTML map editor's menu
 			lateralMenu = document.getElementById("lateralMenuGraphics");
-			lateralMenu.innerHTML = "<div class='control'><button class='sideButton downloadButton' onclick='DownloadMap()'><i class='material-icons'>download</i> Download</button><button class='sideButton' onclick='ResetMap()'><i class='material-icons'>delete</i> Reset Map</button></div>";
+			lateralMenu.innerHTML = "<div class='control'><button class='sideButton downloadButton' onclick='DownloadMap()'><i class='material-icons'>download</i> Download</button><button class='sideButton' onclick='downloadManager()'><i class='material-icons'>upload</i> Upload</button><button class='sideButton' onclick='ResetMap()'><i class='material-icons'>delete</i> Reset Map</button></div>";
 			
 		}	
 		
@@ -255,7 +258,7 @@
 			var tablerowscount=tableShapes.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
 			for (let i=0; i<tablerowscount.length; i++) {
 				//console.log(tablerowscount[i].cells);
-				AddHoverListenerToElements(tablerowscount[i].cells, function(){return {x:0,y:0}});
+				AddHoverListenerToElements(tablerowscount[i].cells, function(){return new Point(0,0)});
 			}
 			AddClickListenerToElement(tableShapes, OnShapesGridClick);
 		}

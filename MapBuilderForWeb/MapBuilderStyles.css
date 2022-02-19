@@ -35,9 +35,7 @@
 		--delete-icon: #D69D85;
 	}
 
-	html {
-		zoom: 150%;
-	}
+
 
 	tr, td {
 		padding: 0.6rem;
@@ -53,6 +51,8 @@
 		font-size: 1rem;
 		font-weight: bold;
 	}
+	
+	
 	
 	.layout{
 		background-color: var(--background);
@@ -193,6 +193,12 @@
 		  background-color: var(--download-button-hover);
 		  box-shadow: 0px 0px 10px var(--item-shadow);
 		}
+		
+		.sideButton i{
+			float:left;
+			font-size: xx-large;
+		}
+		
 		
 	.inputName {
 		border: 2px dashed var(--light-gray);

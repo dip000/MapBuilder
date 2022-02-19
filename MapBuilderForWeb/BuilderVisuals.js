@@ -79,6 +79,8 @@
 	
 // PRINTERS ////////////////////////////////////////////////////////////////////////
 		
+	var previousLevel;
+	
 	function printHoverVisuals(){		
 		//Read all from current placing info
 		let shape = listOfShapes[currentItemPlacingInfo.itemType];
@@ -96,10 +98,11 @@
 		
 		//console.log(new Vector2Array(coordenates));
 
-		printVisualsOfCoordenates( previusCoordenates , clearedGridColor );
+		printVisualsOfCoordenates( previusCoordenates , clearedGridColor, previousLevel );
 		printVisualsOfCoordenates( coordenates, itemShadowColor );
 		
 		previusCoordenates = coordenates;
+		previousLevel = levels[ currentItemPlacingInfo.level.x ][ currentItemPlacingInfo.level.y ];
 	}
 	
 	var _x=0, _y=0;
