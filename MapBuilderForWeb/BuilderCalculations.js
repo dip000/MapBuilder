@@ -152,7 +152,22 @@
 		   
 		   return minValue;
 	   }
-	   
+
+	   	function GetMinValues(coordenates){
+		let minValue = {x:999, y:999};
+		
+		for( let i=0; i<coordenates.x.length; i++ ){
+			if(coordenates.x[i] < minValue.x){
+				minValue.x = coordenates.x[i];
+			}
+			if(coordenates.y[i] < minValue.y){
+				minValue.y = coordenates.y[i];
+			}
+		}
+		
+		return minValue;
+		}
+
 	   function GetMaxValuesOfCoordenates(coordenates){
 		   let maxValue = {x:0, y:0};
 		   

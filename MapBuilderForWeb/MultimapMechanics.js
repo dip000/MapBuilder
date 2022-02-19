@@ -1,16 +1,18 @@
 
 
-	function resetMap(){
+	function clearMap(){
 		if( AskForReset() == DONT_RESET ) return;
 
+		ResetMap();
 		if(gridMap != null){
 			document.getElementById("GridGraphics").removeChild(gridMap);
 			gridMap = null;
 		}
+		//console.log("clearMap");
 	}
 
 	function map(x, y){
-		resetMap()
+		clearMap();
 
 		gridSize.x =  Math.max(1, x);
 		gridSize.y =  Math.max(1, y);
@@ -27,10 +29,20 @@
 		map(gridSize.x, gridSize.y);
 	}
 
+	function MapRowCols(x, y, nrows, ncols){
+		clearMap();
+
+		gridCols = Math.max(1, ncols);
+		gridRows = Math.max(1, nrows);
+		gridSize.x =  Math.max(1, x);
+		gridSize.y =  Math.max(1, y);
+		initializeMapEditorGrid( gridSize.x, gridSize.y );
+	}
+
 	const RESET = true;
 	const DONT_RESET = false;
 	function AskForReset(message=""){
-		for(let r=0; r<occupancyMaps.length; r++){
+		/*for(let r=0; r<occupancyMaps.length; r++){
 			for(let c=0; c<occupancyMaps[0].length; c++){
 				
 				let coordenates = OccupancyMapToCoordenates(occupancyMaps[r][c]);
@@ -41,7 +53,8 @@
 					return DONT_RESET;
 				}
 			}
-		}
+		}*/
+		//console.log("AskForReset");
 		return RESET;
 	}
 
@@ -106,8 +119,9 @@
 				
 				//Localized coordenates are just the minimum size in which the whole level fits
 				let rotatedCoordenates;
+				let residueData;
 				if(localize){
-					let data = outputData[r][c].generateFromMap( occupancyMaps[r][c] );
+					residueData = outputData[r][c].generateFromMap( occupancyMaps[r][c] );
 					
 					//Rotates in local space
 					rotatedCoordenates = LocalizeCoordenates(formatedCoordenates);
@@ -121,7 +135,14 @@
 					outputData[r][c].mapSizeX = gridSize.y;
 					outputData[r][c].mapSizeY = gridSize.x;
 				}
-				
+
+				//Data that can be used to upload and rebuild the session
+				outputData[r][c].parseInfo.originalSize = gridSize;
+				outputData[r][c].parseInfo.originalOffset = residueData;
+				outputData[r][c].parseInfo.level = new Point(r,c);
+				outputData[r][c].parseInfo.rows = gridRows;
+				outputData[r][c].parseInfo.cols = gridCols;
+
 				//Coordenates are formated and sent back to output data
 				outputData[r][c].positionsX = rotatedCoordenates.x;
 				outputData[r][c].positionsY = rotatedCoordenates.y;

@@ -295,7 +295,7 @@ function ItemPlacingInfo(itemType, rotation, positionX, positionY, coordenates, 
 		this.positionX = 0;
 		this.positionY = 0;
 		this.coordenates = new Vector2Array();
-		this.level = {x:0, y:0};
+		this.level = new Point();
 	
 		//Internal properties
 		this.indexInHistory = 0;
@@ -326,10 +326,9 @@ function OutputData(){
 	this.mapSizeX = 0;
 	this.mapSizeY = 0;
 	this.mapName = "unnamed";
+	this.parseInfo = {originalSize:null, originalOffset:null, level:null, rows:null, cols:null};
 
     this.generateFromHistory = function( history=historyOfPlacements ){
-		
-		//if(history == null) history = ;
 		
 		let numberOfInstructions = history.length;
 		this.itemTypes = [];
@@ -439,32 +438,59 @@ function Point(x, y){
 	}
 
 	function uploadMaps(mapsString){
+
 		let maps = [];
-		let mapSize;
+		maps[0] = JSON.parse(mapsString[0]);
 
-		// Simplified version with a non cutted map
-		if(mapsString.length == 1){
-			maps = JSON.parse(mapsString[0]);
-			updateMap(maps);
-			return;
-		}
+		//Rebuild from parseInfo data
+		let newMapSizeX = maps[0].parseInfo.originalSize.x;
+		let newMapSizeY = maps[0].parseInfo.originalSize.y;
+		let nrows = maps[0].parseInfo.rows;
+		let ncols = maps[0].parseInfo.cols;
 
-		// First parse all
-		let nmaps = mapsString.length;
-		for(let i=0; i<nmaps; i++){
+		MapRowCols(newMapSizeX, newMapSizeY, nrows, ncols);
+		updateMap(maps[0]);
+
+		//Build each map
+		for(let i=1; i<mapsString.length; i++){
 			maps[i] = JSON.parse(mapsString[i]);
+			updateMap(maps[i]);
 		}
 
 
 	}
 
-	function updateMap(maps){
-		map(maps.mapSizeX, maps.mapSizeY);
+	function updateMap(maps){	
+		//Rebuild from parseInfo data
+		currentItemPlacingInfo.level = maps.parseInfo.level;
+
+		let placementOffset = new Point(0,0);
+		if( maps.parseInfo.originalOffset != null ){
+			placementOffset.x = maps.parseInfo.originalOffset.minX;
+			placementOffset.y = maps.parseInfo.originalOffset.minY;
+		}
 
 		for(let i=0; i<maps.positionsX.length; i++){
-			ChangeItem(maps.itemTypes[i]);
+
 			currentItemPlacingInfo.rotation = maps.itemRotations[i];
-			OnGridClick(maps.positionsX[i], maps.positionsY[i]);
+			currentItemPlacingInfo.itemType = maps.itemTypes[i];
+
+			let itemType = maps.itemTypes[i];
+			let itemShape = listOfShapes[itemType];
+			let shapeRotated = RotateCoordenatesByAngle(itemShape, currentItemPlacingInfo.rotation);
+
+			//Performs a global rotation. Switches axis and mirrors Y
+			currentItemPlacingInfo.positionX = (maps.mapSizeY-1) - maps.positionsY[i] + placementOffset.x;
+			currentItemPlacingInfo.positionY = maps.positionsX[i] + placementOffset.y;
+
+			let pivot = GetMinValuesOfCoordenates(shapeRotated);
+			let coordenates = GlobalizeCoordenates(shapeRotated, currentItemPlacingInfo.positionX - pivot.x, currentItemPlacingInfo.positionY - pivot.y);
+			currentItemPlacingInfo.coordenates = coordenates;
+
+			//console.log( new ItemPlacingInfo(currentItemPlacingInfo) )
+			printVisualsOfCoordenates(coordenates, listOfShapeColors[ maps.itemTypes[i] ]);
+			UpdateOccupancy(coordenates, OCCUPIED);
+			RegisterHistoryOfPlacements(currentItemPlacingInfo);
 		}
 	}
 
