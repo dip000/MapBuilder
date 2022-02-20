@@ -1,6 +1,6 @@
 
 	:root{
-		/* GREEN TO YELLOW PALLETE
+		/* GREEN TO YELLOW PALETTE
   		--darker: #00703E;
   		--dark: #1D8742;
   		--normal-dark: #389D43;
@@ -9,42 +9,54 @@
   		--light: #95E02F;
   		--lighter: #B9F51B;
 		*/
+		/*
+		--TITLE: VISUAL STUDIO PALETTE;
+		--blue: #569CD6;
+		--light-blue: #9CDCFE;
+		--green: #57A64A;
+		--light-green: #4EC9B0;
+		--yellow: #DCDCAA;
+		--pink: #D8A0D1;
+		--orange: #D69D85;
+		*/
 		
-  		--background: #1D8742;
-  		--table-shadow: #00703E;
-  		--item-hover: #55B441;
-  		--item-shadow: #00703E;
-  		--item-click: #B9F51B;
-  		--lateral-menu-background: #55B441;
-  		--side-button: #00703E;
-  		--side-button-hover: #00501E;
-  		--download-button: #95E02F;
-  		--download-button-hover: #B9F51B;
+  		--background: #1E1E1E;
+  		--table-shadow: #111111;
+  		--item-hover: #D8A0D1;
+  		--item-shadow: #D8A0D1;
+  		--item-click: #D8A0D1;
+  		--lateral-menu-background: #353535;
+  		--side-button: #D69D85;
+  		--side-button-hover: #D8A0D1;
+  		--download-button: #D69D85;
+  		--download-button-hover: #D8A0D1;
+		--white:#ffffff;
+		--light-gray:#302f2f3b;
+		--delete-icon: #D69D85;
 	}
+
 
 
 	tr, td {
 		padding: 0.6rem;
-		border: 1px dashed lightGray;
-		background-color:white;
 		vertical-align: top;
 		cursor: pointer;
 	}
 	table {
 		border: 0px;
+		border-radius: 5px;
 		border-collapse: collapse;
 		margin:2px;
-		box-shadow: 0px 0px 15px var(--table-shadow);
 
 		font-size: 1rem;
 		font-weight: bold;
-		color: white;
 	}
+	
+	
 	
 	.layout{
 		background-color: var(--background);
 		padding: 5px;
-		border: 1px dashed lightGray;
 	}
 
 	body {
@@ -55,41 +67,54 @@
 
 	.items .item{
 		display: inline-block;
-		padding: 5px;
+		padding: 10px;
+		margin-left: 20px;
 		cursor: pointer;
 		box-shadow: none;
-		border: 2px dashed #00000000;
-		border-radius: 3px;
+		border-radius: 5px;
 		transition: 0.1s ease-in-out;
+		color: var(--white);
+		background-color: var(--background);
 	}	
 		.item:hover {
-			border: 2px dashed var(--item-click);
 			box-shadow: 0px 0px 15px var(--item-click);
 			transform: scale(1.1);
 			transition: 0.1s ease-in-out;
 		}
-	
+		.item td, .item tr{
+			background-color: var(--white);
+			border: 1px dashed var(--light-gray);
+		}
+
+	.gridLevel td, .gridLevel tr{
+		background-color: var(--white);
+		border: 1px dashed var(--light-gray);
+	}
 	
 	.stats {
 		position: absolute;
-		left: 20px;
-		bottom: 40px;
+		text-align: right;
+		right: 45px;
+		bottom: 20px;
 		color: gray;
 	}
 	
 	#lateralMenuGraphics {
 		background-color: var(--lateral-menu-background);
 		box-shadow: 0px 0px 5px var(--lateral-menu-background);
-		min-height: 410px;
+		min-height: 400px;
 		cursor: default;
 		width: 290px;
+		border-radius: 5px;
 	}
 	#itemsArea {
-		height: 180px;
+		height: 190px;
 		cursor: default;
 		overflow-x: auto;
-		max-width: 1000px;
-	
+		max-width: 1236px;
+		background-color: var(--lateral-menu-background);
+		border-radius: 5px;
+
 		display: flex;
 		align-items: center;
 	}
@@ -101,14 +126,22 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		background-color: var(--lateral-menu-background);
+		border-radius: 5px;
+	}
+
+	#gridMap{
+		background-color: var(--lateral-menu-background);
 	}
 	
-	
+	.shapeMap tr, .shapeMap td{
+		background-color: var(--white);
+		border: 1px dashed var(--light-gray);
+	}
 	
 	.addShapeButton{
-		background-color: white;
+		background-color: var(--white);
 		border-radius: 50px;
-		border: 2px dashed var(--background);
 		text-align: center;
 		padding-bottom: 9;
 		width: 50;
@@ -119,8 +152,7 @@
 	}
 		.addShapeButton:hover{
 			background-color: var(--item-hover);
-			color: white;
-			border: 2px dashed var(--item-click);
+			color: var(--white);
 			box-shadow: 0px 0px 15px var(--item-click);
 			transform: scale(1.1);		
 			transition: 0.1s ease-in-out;
@@ -141,16 +173,17 @@
 		width: 270px;
 		height: 90px;
 		background-color: var(--side-button);
-		border: 2px dashed lightGray;
+		border-radius: 5px;
 		
 		font-size: 2rem;
 		font-weight: bold;
-		color: white;
+		color: var(--white);
 		
 		cursor: pointer;
 	}
 		.sideButton:hover {
 		  background-color: var(--side-button-hover);
+		  box-shadow: 0px 0px 10px var(--item-shadow);
 		}
 		
 		.downloadButton{
@@ -159,20 +192,28 @@
 	
 		.downloadButton:hover {
 		  background-color: var(--download-button-hover);
+		  box-shadow: 0px 0px 10px var(--item-shadow);
 		}
 		
+		.sideButton i{
+			float:left;
+			font-size: xx-large;
+		}
+		
+		
 	.inputName {
-		border: 2px dashed lightGray;
+		border: 2px dashed var(--light-gray);
 		padding: 19px;
 		margin-top: 10px;
 		transition: 0.1s ease-out;
 		font-weight: bolder;
 		font-size: x-large;
 		width: 211px;
+		border-radius: 5px;
 	}
 		.inputName:hover {
 			background-color: var(--item-hover);
-			color: white;
+			color: var(--white);
 			border: 2px dashed var(--item-click);
 			box-shadow: 0px 0px 15px var(--item-click);
 			transform: scale(1.1);		
@@ -181,11 +222,11 @@
 		
 	.deleteIcon{
 		float: right;
-		color: white;
+		color: var(--white);
 	}
 		.deleteIcon:hover{
 			float: right;
-			color: #FF5555AA;
+			color: var(--delete-icon);
 		}
 
  /*style="transform: rotate(90deg)"*/

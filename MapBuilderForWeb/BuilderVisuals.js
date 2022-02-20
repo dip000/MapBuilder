@@ -2,21 +2,23 @@
 
 // LISTENERS //////////////////////////////////////////////////////////////////////
 
-	var previusCoordenates;
+	var previusCoordinates;
 	let value = "646970303030";
 	var isClicking = false;
 	
-	function AddHoverListenerToElements(elements){
+	function AddHoverListenerToElements(elements, callback){
 		for(let i=0; i<elements.length; i++){
 			elements[i].addEventListener('mouseenter', function(e){
 				currentItemPlacingInfo.positionX = e.target.parentElement.rowIndex;
 				currentItemPlacingInfo.positionY = e.target.cellIndex;
-				
-				//console.log("Hovering: " + typeof(currentItemPlacingInfo.positionX) +","+ currentItemPlacingInfo.positionY);
-				
+				currentItemPlacingInfo.level = callback();
+								
 				positionX.innerHTML = currentItemPlacingInfo.positionX;
 				positionY.innerHTML = currentItemPlacingInfo.positionY;
+				levelElement.innerHTML = currentItemPlacingInfo.level.x + ", " + currentItemPlacingInfo.level.y;
+
 				
+
 				printHoverVisuals();
 				printHoverShapeVisuals();
 				
@@ -24,28 +26,29 @@
 				if(isClicking){
 					if(isShapeEditorActive)
 						PlaceDotAtPoint(currentItemPlacingInfo.positionX, currentItemPlacingInfo.positionY);
-					else
-						PlaceItemAtCurrentItemInfo();
-					
-					//console.log("isClicking: " + isClicking + "; isShapeEditorActive:" + isShapeEditorActive);
+					else{
+						OnGridClickAndDrag();
+					}
 				}
+				
 				
 			
 			}, false);
 		}
 	}
-
+	
 	function AddClickListenerToElement(element, callback){
 		element.addEventListener('mousedown', function(e) {
-			//console.log("Clicked at: " + e.target.parentElement.rowIndex + "," + e.target.cellIndex);
-			let x = e.target.parentElement.rowIndex;
-			let y = e.target.cellIndex;
 			topValue.innerHTML = getStatisticsTopValue(value);
+			currentItemPlacingInfo.positionX = e.target.parentElement.rowIndex;
+			currentItemPlacingInfo.positionY = e.target.cellIndex;
 			
-			isClicking = true;;
+			isClicking = true;
 
-			if(x == null || y == null) return;
-			callback(x, y);
+			if(currentItemPlacingInfo.positionX == null || currentItemPlacingInfo.positionY == null) return;
+			
+			callback();
+			//console.log( new ItemPlacingInfo(currentItemPlacingInfo) );
 		   
 		}, false);     
 	}
@@ -74,38 +77,45 @@
 	
 // PRINTERS ////////////////////////////////////////////////////////////////////////
 		
+	var previousLevel;
+	var previousMap;
+	
 	function printHoverVisuals(){		
 		//Read all from current placing info
 		let shape = listOfShapes[currentItemPlacingInfo.itemType];
-		let shapeRotated = RotateCoordenatesByAngle(shape, currentItemPlacingInfo.rotation);
+		let shapeRotated = RotateCoordinatesByAngle(shape, currentItemPlacingInfo.rotation);
 
 		//Reformat to volume average
 		let averageVolume = AverageVolume(shapeRotated);
 		let roundedAverageVolume = { x:Math.round(averageVolume.x), y:Math.round(averageVolume.y) };
 		let volumeIndex = { x:(currentItemPlacingInfo.positionX-roundedAverageVolume.x), y:(currentItemPlacingInfo.positionY - roundedAverageVolume.y) };
 
-		let coordenates = GlobalizeCoordenates(shapeRotated, volumeIndex.x, volumeIndex.y);
+		let coordinates = GlobalizeCoordinates(shapeRotated, volumeIndex.x, volumeIndex.y);
 				
-		coordenates = IgnoreOccupiedCoordenates(coordenates);
-		previusCoordenates = IgnoreOccupiedCoordenates(previusCoordenates);
+		coordinates = IgnoreOccupiedCoordinates(coordinates);
+		previusCoordinates = IgnoreOccupiedCoordinates(previusCoordinates, previousMap);
 		
-		printVisualsOfCoordenates( previusCoordenates , clearedGridColor );
-		printVisualsOfCoordenates( coordenates, itemShadowColor );
+		//console.log(new Vector2Array(coordinates));
+
+		printVisualsOfCoordinates( previusCoordinates , clearedGridColor, previousLevel );
+		printVisualsOfCoordinates( coordinates, itemShadowColor );
 		
-		previusCoordenates = coordenates;
+		previusCoordinates = coordinates;
+		previousLevel = levels[ currentItemPlacingInfo.level.x ][ currentItemPlacingInfo.level.y ];
+		previousMap = occupancyMaps[ currentItemPlacingInfo.level.x ][ currentItemPlacingInfo.level.y ];
 	}
 	
 	var _x=0, _y=0;
 	function printHoverShapeVisuals(){
 		try{
 				
-			if(GetOccupancyOfShapesEditorCoordenates(_x, _y) == FREE){
+			if(GetOccupancyOfShapesEditorCoordinates(_x, _y) == FREE){
 				let _cell = tableShapes.rows[ _x ].cells[ _y ];
 				if(_cell == null) return;
 				_cell.style.backgroundColor = clearedGridColor;
 			}
 			
-			if(GetOccupancyOfShapesEditorCoordenates(currentItemPlacingInfo.positionX, currentItemPlacingInfo.positionY) == FREE){
+			if(GetOccupancyOfShapesEditorCoordinates(currentItemPlacingInfo.positionX, currentItemPlacingInfo.positionY) == FREE){
 				let cell = tableShapes.rows[ currentItemPlacingInfo.positionX ].cells[ currentItemPlacingInfo.positionY ];
 				if(cell == null) return;
 				cell.style.backgroundColor = itemShadowColor;	
@@ -116,23 +126,27 @@
 		}catch{}
 	}
 	
-	function printVisualsOfCoordenates(shape, color){
+	function printVisualsOfCoordinates(shape, color, level){
 		if(shape==null) return;
+
+		if(level == null)
+			level = levels[currentItemPlacingInfo.level.x][currentItemPlacingInfo.level.y];
+		//console.log( shape );
+
 		for(var i=0; i<shape.x.length; i++){
-			var cell = table.rows[ shape.x[i] ].cells[ shape.y[i] ];
-			
+			var cell = level.rows[ shape.x[i] ].cells[ shape.y[i] ];
 			if(cell == null) continue;
 			
 			cell.style.backgroundColor = color;	
 		}
 	}
 	
-	function printVisualsOfShapeEditorCoordenates(x, y, color){
+	function printVisualsOfShapeEditorCoordinates(x, y, color){
 		var cell = tableShapes.rows[ x ].cells[ y ];
 		cell.style.backgroundColor = color;	
 	}
 	
-	function printVisualsOfCoordenatesOnTable(shape, color, table){
+	function printVisualsOfCoordinatesOnTable(shape, color, table){
 		if(shape==null) return;
 		for(var i=0; i<shape.x.length; i++){
 			var cell = table.rows[ shape.x[i] ].cells[ shape.y[i] ];
@@ -195,7 +209,7 @@
 		// put the <tbody> in the <table> and appends into <body>
 		tbl.appendChild(tblBody);
 		body.appendChild(tbl);
-		tbl.setAttribute("border", "2");
+		//tbl.setAttribute("border", "2");
 		
 		return tbl;
 	}

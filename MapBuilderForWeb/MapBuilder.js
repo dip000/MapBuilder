@@ -1,44 +1,68 @@
 
-        var shapeCoordenates = [];
-        function RegisterCoordenatesInMap(x, y){
+        var shapeCoordinates = [];
+        function RegisterCoordinatesInMap(x, y){
             if(isPrintAction){
-                shapeCoordenates[x+","+y] = {x,y};
+                shapeCoordinates[x+","+y] = {x,y};
             }
             else{
-                delete shapeCoordenates[x+","+y]; 
+                delete shapeCoordinates[x+","+y]; 
             }
-            //console.log(shapeCoordenates);
+            //console.log(shapeCoordinates);
         }
 
   
-		var occupancyMap;
 		const OCCUPIED = true;
 		const FREE = false;
-		function GetOccupancyOfCoordenates(coordenates){
-			//If at least one coordenate is occupied, then return occupied
+		const OUT_OF_BOUNDS = 2;
+		const OBSTRUCTED = 3;
+		const MAP_CUT = 4;
+		const NULL = 5;
+		function GetOccupancyOfPlacingInfo(){
+
+ 			//let mapLengthX = occupancyMap.length;
+			//let mapLengthY = occupancyMap[0].length;
+			
+			let occupancyMap = occupancyMaps[currentItemPlacingInfo.level.x][currentItemPlacingInfo.level.y];
+
+			let x = currentItemPlacingInfo.coordinates.x;
+			let y = currentItemPlacingInfo.coordinates.y;
+
 			try{
-				for(var i=0; i<coordenates.x.length; i++){
-					if(occupancyMap[coordenates.x[i]][coordenates.y[i]] == OCCUPIED){
-						//console.log("Coordenates are occupied:");
-						//console.log(coordenates);
-						return OCCUPIED;
+				let state = ( occupancyMap[ currentItemPlacingInfo.positionX ][ currentItemPlacingInfo.positionY ] );
+				
+				if( state == null){
+					return NULL;
+				}
+				if( state == OCCUPIED){
+					return OCCUPIED;
+				}
+
+				for(var i=0; i<x.length; i++){
+					state = occupancyMap[ x[i] ][ y[i] ];
+					
+					if(state == null){
+						return OUT_OF_BOUNDS;
+					}
+					
+					if(state == OCCUPIED){
+						return OBSTRUCTED;
 					}
 				}
-			} catch {return OCCUPIED;}
-			//console.log("Coordenates are unoccupied:");
-			//console.log(coordenates);
+			} catch {return OUT_OF_BOUNDS;}
+
 			return FREE;
 		}
 		
 
 		
-		function UpdateOccupancy(coordenates, OCCUPIED){
-            for(var i=0; i<coordenates.x.length; i++){
-				occupancyMap[coordenates.x[i]][coordenates.y[i]] = OCCUPIED;
-			}
+		function UpdateOccupancy(coordinates, state, map){
+			let occupancyMap = map;
+			if( occupancyMap == null )
+				occupancyMap = occupancyMaps[currentItemPlacingInfo.level.x][currentItemPlacingInfo.level.y];
 			
-			//console.log("UPDATED OCCUPANCY MAP:");
-			//console.log(occupancyMap);
+			for(var i=0; i<coordinates.x.length; i++){
+				occupancyMap[coordinates.x[i]][coordinates.y[i]] = state;
+			}		
 		}
 		
 		var historyOfPlacements = [];
@@ -46,31 +70,12 @@
 		function RegisterHistoryOfPlacements(itemPlacingInfo){
 			itemPlacingInfo.indexInHistory = historyIndex;
 			historyOfPlacements[historyIndex++] = new ItemPlacingInfo(itemPlacingInfo);
-			//console.log("Registered in history. History:");
-			//console.log(historyOfPlacements);
 		}
 		
 		function DeleteFromHistoryOfPlacements(itemPlacingInfo){
 			historyOfPlacements[itemPlacingInfo.indexInHistory].undoFromHistory();
-			//console.log("Undone from history. History:");
-			//console.log(historyOfPlacements);
 		}
 		
-		function UndoActionFromHistory(itemPlacingInfo){
-			if(itemPlacingInfo == null) return;
-		
-			itemPlacingInfo.deleted = ! (itemPlacingInfo.deleted);
-			//console.log("Undone Last action from history. History:");
-			//console.log(historyOfPlacements);
-			
-			if(itemPlacingInfo.deleted == true){
-				return ActionTypes.deleted;
-			}
-			else{
-				return ActionTypes.replaced;
-			}
-		}
-
 		function GetInformationFromHistoryIndex(index){
 			if(index < 0) return null;
 			if(index > historyOfPlacements.length-1) return null;
@@ -78,7 +83,7 @@
 		}
 		
 		
-		function FindHistoryInfoAtCoordenates(coordenate){
+		function FindHistoryInfoAtCurrentPlacement(){
 			for(var i=0; i<historyOfPlacements.length; i++){
 			
 				//Skip the search if it was marked as deleted
@@ -86,11 +91,40 @@
 					continue;
 				}
 				
-				let historyCoordenates = historyOfPlacements[i].coordenates;
+				let history = historyOfPlacements[i];
+				let historyCoordinates = history.coordinates;
 				
-				for(var j=0; j<historyCoordenates.x.length; j++){
-					let sameCoordenateX = (historyCoordenates.x[j] == coordenate.x[0]);
-					let sameCoordenateY = (historyCoordenates.y[j] == coordenate.y[0]);
+				//Skip placement if it happened in a different level
+				let differentLevelX = (history.level.x != currentItemPlacingInfo.level.x);
+				let differentLevelY = (history.level.y != currentItemPlacingInfo.level.y);
+				if( differentLevelX || differentLevelY ){
+					continue;
+				}
+				
+				for(var j=0; j<historyCoordinates.x.length; j++){
+					let sameCoordenateX = (historyCoordinates.x[j] == currentItemPlacingInfo.positionX);
+					let sameCoordenateY = (historyCoordinates.y[j] == currentItemPlacingInfo.positionY);
+					if(sameCoordenateX && sameCoordenateY){
+						return historyOfPlacements[i];
+					}
+				}
+			}
+
+			return null;
+		}
+	
+		function FindHistoryInfoAtPoint(point){
+			for(var i=0; i<historyOfPlacements.length; i++){
+			
+				//Skip the search if it was marked as deleted
+				if(historyOfPlacements[i].deleted == true){
+					continue;
+				}
+				let historyCoordinates = historyOfPlacements[i].coordinates;
+				
+				for(var j=0; j<historyCoordinates.x.length; j++){
+					let sameCoordenateX = (historyCoordinates.x[j] == point.x);
+					let sameCoordenateY = (historyCoordinates.y[j] == point.y);
 					
 					if(sameCoordenateX && sameCoordenateY){
 						return historyOfPlacements[i];
@@ -103,44 +137,46 @@
 
 
 
-		function IgnoreOccupiedCoordenates(coordenates){
-			if(coordenates == null) return null;
+		function IgnoreOccupiedCoordinates(coordinates, map){
+			if(coordinates == null) return null;
 			
-			newCoordenates = new Vector2Array();
+			newCoordinates = new Vector2Array();
 			let j=0;
-			let mapLengthX = occupancyMap.length;
-			let mapLengthY = occupancyMap[0].length;
 			
-			for(let i=0; i<coordenates.x.length; i++){
+			let occupancyMap = map;
+			if( occupancyMap == null )
+				occupancyMap = occupancyMaps[currentItemPlacingInfo.level.x][currentItemPlacingInfo.level.y];
+			
+			for(let i=0; i<coordinates.x.length; i++){
 				
 				try{
-					if(occupancyMap[coordenates.x[i]][coordenates.y[i]] == FREE){
-						newCoordenates.x[j] = coordenates.x[i];
-						newCoordenates.y[j] = coordenates.y[i];
+					if(occupancyMap[coordinates.x[i]][coordinates.y[i]] == FREE){
+						newCoordinates.x[j] = coordinates.x[i];
+						newCoordinates.y[j] = coordinates.y[i];
 						j++;
 					}
 				} catch{}
 			}
 			
-			//console.log(newCoordenates);
-			return newCoordenates;
+			//console.log(newCoordinates);
+			return newCoordinates;
 		}
 	
 //REFORMAT AND OUTPUT ///////////////////////////////////////////////////
 
 		
-		function formatCoordenates(){
+		function formatCoordinates(){
 			
 			let outputData = new OutputData();
 			outputData.generateFromHistory();
-			outputData.generateFromMap();
+			outputData.generateFromMap(occupancyMaps[currentItemPlacingInfo.level.x][currentItemPlacingInfo.level.y]);
 		
-			let formatedCoordenates = new Vector2Array(outputData.positionsX, outputData.positionsY);
-			formatedCoordenates = LocalizeCoordenates(formatedCoordenates);
-			formatedCoordenates = RotateCoordenates90Clockwise(formatedCoordenates);
+			let formatedCoordinates = new Vector2Array(outputData.positionsX, outputData.positionsY);
+			formatedCoordinates = LocalizeCoordinates(formatedCoordinates);
+			formatedCoordinates = RotateCoordinates90Clockwise(formatedCoordinates);
 			
-			outputData.positionsX = formatedCoordenates.x;
-			outputData.positionsY = formatedCoordenates.y;
+			outputData.positionsX = formatedCoordinates.x;
+			outputData.positionsY = formatedCoordinates.y;
 			
 			return outputData;
 		}
@@ -148,12 +184,12 @@
 		function formatShapes(){
 			let output = "";
 			for( let i=0; i<listOfShapes.length; i++){
-				let shapeFormated = RotateCoordenatesByAngle( listOfShapes[i], -90 );
+				let shapeFormated = RotateCoordinatesByAngle( listOfShapes[i], -90 );
 				
 				let outputShape = {
 					itemName : listOfShapeNames[i],
-					localCoordenatesX : shapeFormated.x,
-					localCoordenatesY : shapeFormated.y
+					localCoordinatesX : shapeFormated.x,
+					localCoordinatesY : shapeFormated.y
 				};
 				output += JSON.stringify(outputShape);
 				
@@ -176,54 +212,55 @@
 
             document.body.removeChild(element);
         }
-/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+
+/////////// KEY COMBOS //////////////////////////////////////////////////////////////
+const keyLog = {}
+const handleKeyboard = ({ type, key, repeat, metaKey }) => {
+	if( repeat ) return;
+	if( isShapeEditorActive ) return;
+
+	if( type === 'keydown' ){
+	keyLog[key] = true
+
+	//Create cuts on rows and cols with Ctrl + arrow keys
+	if(keyLog.Control){
+		if (key === "ArrowLeft")
+			cols(gridCols-1);
+		if (key === "ArrowRight")
+			cols(gridCols+1);
+		if (key === "ArrowDown")
+			rows(gridRows+1);
+		if (key === "ArrowUp")
+			rows(gridRows-1);
+	}
+	else{
+		//Rebuild map rows and cols with arrow keys
+		if (key === "ArrowLeft")
+			map( gridSize.x, gridSize.y-1 );
+		if (key === "ArrowRight")
+			map( gridSize.x, gridSize.y+1 );
+		if (key === "ArrowDown")
+			map( gridSize.x+1, gridSize.y );
+		if (key === "ArrowUp")
+			map( gridSize.x-1,gridSize.y );
+	}
+}
+
+  // Remove the key from the log on keyup.
+  if (type === 'keyup') delete keyLog[key];
+}
 
 
-//UNDO MECHANICS  ////////////////////////////////////////////////////////
-		document.onkeyup = function(e) {
-			//Ctrl+Z  is  Undo
-			if( e.ctrlKey && e.which == 90 && !e.shiftKey){
-				UndoAction(-1);
-			}
-			//Ctrl+Y  is Redo
-			else if( e.ctrlKey && e.which == 89 ){
-				UndoAction(1);
-			}
-			//Ctrl+Shift+Z is Redo as well
-			else if( e.ctrlKey && e.shiftKey && e.which == 90 ){
-				UndoAction(1);
-			}
-		};
-		
-		const ActionTypes = Object.freeze({
-		  deleted: 0,
-		  replaced: 1
-		});
-		
-		var chainedUndoneIndex = 0;
-		function UndoAction(direction){
-			//Test input
-			let test = chainedUndoneIndex + direction + historyIndex;
-			if(test > historyIndex || test < 0 ) return;	
-			chainedUndoneIndex += direction;
-			//console.log("Undone direction: " + direction + "; undone index: " + chainedUndoneIndex + "; global position: " + (historyIndex + chainedUndoneIndex))
-			
-			let itemPlacingInfo = GetInformationFromHistoryIndex(historyIndex + chainedUndoneIndex);
-			if(itemPlacingInfo == null) return;
-			
-			let actionResult = UndoActionFromHistory(itemPlacingInfo);
-			
-			if(actionResult == ActionTypes.deleted){
-				printVisualsOfCoordenates(itemPlacingInfo.coordenates, clearedGridColor);
-				UpdateOccupancy(itemPlacingInfo.coordenates, FREE);
-			}
-			else{
-				printVisualsOfCoordenates(itemPlacingInfo.coordenates, itemPlacedColor);
-				UpdateOccupancy(itemPlacingInfo.coordenates, OCCUPIED);
-			}
-		}
+function initailizeKeyCombos(){
+  const events = ['keydown', 'keyup']
+  events.forEach(name => document.addEventListener(name, handleKeyboard))
+
+  return () =>
+    events.forEach(name => document.removeEventListener(name, handleKeyboard))
+}
+
 ////////////////////////////////////////////////////////////////////////////////////
-
 
 // TYPES AND CONSTRUCTORS //////////////////////////////////////////////////////////
 function Vector2Array(x, y) {
@@ -249,11 +286,11 @@ function Vector2Array(x, y) {
 		this.y = [];
 	}
 	else{
-		//console.error("Constructor of Vector2Array did not found an overload for input");
+		console.error("Constructor of Vector2Array did not found an overload for input");
 	}
 }
 
-function ItemPlacingInfo(itemType, rotation, positionX, positionY, coordenates){
+function ItemPlacingInfo(itemType, rotation, positionX, positionY, coordinates, level){
 
 	if(itemType instanceof ItemPlacingInfo){
 		let instance = JSON.parse(JSON.stringify(itemType));
@@ -261,17 +298,19 @@ function ItemPlacingInfo(itemType, rotation, positionX, positionY, coordenates){
 		this.rotation  = instance.rotation;
 		this.positionX = instance.positionX;
 		this.positionY = instance.positionY;
-		this.coordenates = instance.coordenates;
+		this.coordinates = instance.coordinates;
 		this.indexInHistory = instance.indexInHistory;
 		this.deleted = instance.deleted;
+		this.level = instance.level;
 	}
 	else if(itemType == null){
 		this.itemType  = 0;
 		this.rotation  = 0;
 		this.positionX = 0;
 		this.positionY = 0;
-		this.coordenates = new Vector2Array();
-		
+		this.coordinates = new Vector2Array();
+		this.level = new Point();
+	
 		//Internal properties
 		this.indexInHistory = 0;
 		this.deleted = false;
@@ -281,7 +320,8 @@ function ItemPlacingInfo(itemType, rotation, positionX, positionY, coordenates){
 		this.rotation  = rotation;
 		this.positionX = positionX;
 		this.positionY = positionY;
-		this.coordenates = coordenates;
+		this.coordinates = coordinates;
+		this.level = level;
 		
 		//Internal properties
 		this.indexInHistory = 0;
@@ -293,15 +333,18 @@ function ItemPlacingInfo(itemType, rotation, positionX, positionY, coordenates){
 }
 
 function OutputData(){
-	this.itemTypes;
-	this.itemRotations;
-	this.positionsX;
-	this.positionsY;
-	this.mapSizeX;
-	this.mapSizeY;
+	this.itemTypes = new Array();
+	this.itemRotations = new Array();
+	this.positionsX = new Array();
+	this.positionsY = new Array();
+	this.mapSizeX = 0;
+	this.mapSizeY = 0;
+	this.mapName = "unnamed";
+	this.parseInfo = {originalSize:null, originalOffset:null, level:null, rows:null, cols:null};
 
-    this.generateFromHistory = function(){
-		let numberOfInstructions = historyOfPlacements.length;
+    this.generateFromHistory = function( history=historyOfPlacements ){
+		
+		let numberOfInstructions = history.length;
 		this.itemTypes = [];
 		this.itemRotations = [];
 		this.positionsX = [];
@@ -312,19 +355,19 @@ function OutputData(){
 		for(var i=0; i<numberOfInstructions; i++){
 		
 			//Skip the search if it was marked as deleted
-			if(historyOfPlacements[i].deleted == true){
+			if(history[i].deleted == true){
 				continue;
 			}
 			
-			this.itemTypes[j] = historyOfPlacements[i].itemType;
-			this.itemRotations[j] = historyOfPlacements[i].rotation;
-			this.positionsX[j] = historyOfPlacements[i].positionX;
-			this.positionsY[j] = historyOfPlacements[i].positionY;
+			this.itemTypes[j] = history[i].itemType;
+			this.itemRotations[j] = history[i].rotation;
+			this.positionsX[j] = history[i].positionX;
+			this.positionsY[j] = history[i].positionY;
 			j++;
 		}
 	}
 
-	this.generateFromMap = function(){
+	this.generateFromMap = function(occupancyMap){
 		let mapLengthX = occupancyMap.length;
 		let mapLengthY = occupancyMap[0].length;
 		let minX = 999;
@@ -354,7 +397,117 @@ function OutputData(){
 
 		this.mapSizeX = maxY - minY + 1;
 		this.mapSizeY = maxX - minX + 1;
+		
+		return {"minX":minX, "maxX":maxX, "minY":minY, "maxY":maxY};
 	}
+
+	
 }
+
+function Point(x, y){
+	this.x = x;
+	this.y = y;
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////// UPLOAD /////////////////////////////////////////////////
+
+	function upload(uploadString){
+		let mapsAndShapesString, mapsString, shapesString;
+		try{
+			mapsAndShapesString = uploadString.split("$");
+			mapsString = mapsAndShapesString[0].split("&");
+			shapesString = mapsAndShapesString[1].split("&");
+		} catch{ alert("Couldn't parse. File corrupted"); return; }
+				
+		try{ uploadShapes(shapesString);} catch{ alert("Shapes couldn't be loaded"); return;}
+		
+		try{ uploadMaps(mapsString);} catch{ alert("Maps couldn't be loaded"); return;}
+		
+		ChangeItem(0);
+	}
+
+	function uploadShapes(shapesString){
+		listOfShapes = [];
+		let shapes = [];
+		for(let i=0; i<shapesString.length; i++){
+			shapes[i] = JSON.parse(shapesString[i]);
+
+			let shape = new Vector2Array(shapes[i].localCoordinatesX, shapes[i].localCoordinatesY);
+			let shapeRotated = RotateCoordinatesByAngle( shape, 90 );
+
+			listOfShapes[i] = shapeRotated;
+			listOfShapeNames[i] = shapes[i].itemName;
+			listOfShapeColors[i] = randomColor();
+		}
+
+		//Reset shapes visuals
+		let itemsArea = document.getElementById('itemsArea');
+		itemsArea.innerHTML = "";
+		
+		//Show all current shapes
+		initializeMapEditorShapes(listOfShapes.length-1);
+
+	}
+
+	function uploadMaps(mapsString){
+
+		let maps = [];
+		maps[0] = JSON.parse(mapsString[0]);
+
+		//Rebuild from parseInfo data
+		let newMapSizeX = maps[0].parseInfo.originalSize.x;
+		let newMapSizeY = maps[0].parseInfo.originalSize.y;
+		let nrows = maps[0].parseInfo.rows;
+		let ncols = maps[0].parseInfo.cols;
+
+		MapRowCols(newMapSizeX, newMapSizeY, nrows, ncols);
+		updateMap(maps[0]);
+
+		//Build each map
+		for(let i=1; i<mapsString.length; i++){
+			maps[i] = JSON.parse(mapsString[i]);
+			updateMap(maps[i]);
+		}
+
+
+	}
+
+	function updateMap(maps){	
+		//Rebuild from parseInfo data
+		currentItemPlacingInfo.level = maps.parseInfo.level;
+
+		let placementOffset = new Point(0,0);
+		if( maps.parseInfo.originalOffset != null ){
+			placementOffset.x = maps.parseInfo.originalOffset.minX;
+			placementOffset.y = maps.parseInfo.originalOffset.minY;
+		}
+
+		for(let i=0; i<maps.positionsX.length; i++){
+
+			currentItemPlacingInfo.rotation = maps.itemRotations[i];
+			currentItemPlacingInfo.itemType = maps.itemTypes[i];
+
+			let itemType = maps.itemTypes[i];
+			let itemShape = listOfShapes[itemType];
+			let shapeRotated = RotateCoordinatesByAngle(itemShape, currentItemPlacingInfo.rotation);
+
+			//Performs a global rotation. Switches axis and mirrors Y
+			currentItemPlacingInfo.positionX = (maps.mapSizeY-1) - maps.positionsY[i] + placementOffset.x;
+			currentItemPlacingInfo.positionY = maps.positionsX[i] + placementOffset.y;
+
+			let pivot = GetMinValuesOfCoordinates(shapeRotated);
+			let coordinates = GlobalizeCoordinates(shapeRotated, currentItemPlacingInfo.positionX - pivot.x, currentItemPlacingInfo.positionY - pivot.y);
+			currentItemPlacingInfo.coordinates = coordinates;
+
+			//console.log( new ItemPlacingInfo(currentItemPlacingInfo) )
+			printVisualsOfCoordinates(coordinates, listOfShapeColors[ maps.itemTypes[i] ]);
+			UpdateOccupancy(coordinates, OCCUPIED);
+			RegisterHistoryOfPlacements(currentItemPlacingInfo);
+		}
+	}
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////
