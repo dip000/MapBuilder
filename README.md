@@ -24,7 +24,7 @@ To build maps from prefab system and import to Unity.
  0.1-alpha
 </a>
 : draw shapes, erase, glitched undo/redo, rotate, download, Unity interface
-<br><a href="https://github.com/dip000/MapBuilder/releases/tag/EndOfProject">
+<br><a href="https://github.com/dip000/MapBuilder/releases/tag/ProjectContinuation">
 0.2-alpha
 </a>
 : delete shape, upload, multi maps, Unity interface rework
