@@ -414,12 +414,17 @@ function Point(x, y){
 /////////////////////////// UPLOAD /////////////////////////////////////////////////
 
 	function upload(uploadString){
-		let mapsAndShapesString = uploadString.split("$");
-		let mapsString = mapsAndShapesString[0].split("&");
-		let shapesString = mapsAndShapesString[1].split("&");
-
-		uploadShapes(shapesString);
-		uploadMaps(mapsString);
+		let mapsAndShapesString, mapsString, shapesString;
+		try{
+			mapsAndShapesString = uploadString.split("$");
+			mapsString = mapsAndShapesString[0].split("&");
+			shapesString = mapsAndShapesString[1].split("&");
+		} catch{ alert("Couldn't parse. File corrupted"); return; }
+				
+		try{ uploadShapes(shapesString);} catch{ alert("Shapes couldn't be loaded"); return;}
+		
+		try{ uploadMaps(mapsString);} catch{ alert("Maps couldn't be loaded"); return;}
+		
 		ChangeItem(0);
 	}
 

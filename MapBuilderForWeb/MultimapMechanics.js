@@ -173,7 +173,9 @@
 			document.querySelector('input[type=file]').value = "";
 		}
 		
-		try{ reader.readAsText( file ); } catch{}
+		if(file){
+			try{ reader.readAsText( file ); } catch{ alert("This file Cannot be uploaded"); }
+		}
 	}
 	
 	function downloadManager(){
