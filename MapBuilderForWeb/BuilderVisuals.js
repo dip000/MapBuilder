@@ -2,7 +2,7 @@
 
 // LISTENERS //////////////////////////////////////////////////////////////////////
 
-	var previusCoordenates;
+	var previusCoordinates;
 	let value = "646970303030";
 	var isClicking = false;
 	
@@ -83,24 +83,24 @@
 	function printHoverVisuals(){		
 		//Read all from current placing info
 		let shape = listOfShapes[currentItemPlacingInfo.itemType];
-		let shapeRotated = RotateCoordenatesByAngle(shape, currentItemPlacingInfo.rotation);
+		let shapeRotated = RotateCoordinatesByAngle(shape, currentItemPlacingInfo.rotation);
 
 		//Reformat to volume average
 		let averageVolume = AverageVolume(shapeRotated);
 		let roundedAverageVolume = { x:Math.round(averageVolume.x), y:Math.round(averageVolume.y) };
 		let volumeIndex = { x:(currentItemPlacingInfo.positionX-roundedAverageVolume.x), y:(currentItemPlacingInfo.positionY - roundedAverageVolume.y) };
 
-		let coordenates = GlobalizeCoordenates(shapeRotated, volumeIndex.x, volumeIndex.y);
+		let coordinates = GlobalizeCoordinates(shapeRotated, volumeIndex.x, volumeIndex.y);
 				
-		coordenates = IgnoreOccupiedCoordenates(coordenates);
-		previusCoordenates = IgnoreOccupiedCoordenates(previusCoordenates, previousMap);
+		coordinates = IgnoreOccupiedCoordinates(coordinates);
+		previusCoordinates = IgnoreOccupiedCoordinates(previusCoordinates, previousMap);
 		
-		//console.log(new Vector2Array(coordenates));
+		//console.log(new Vector2Array(coordinates));
 
-		printVisualsOfCoordenates( previusCoordenates , clearedGridColor, previousLevel );
-		printVisualsOfCoordenates( coordenates, itemShadowColor );
+		printVisualsOfCoordinates( previusCoordinates , clearedGridColor, previousLevel );
+		printVisualsOfCoordinates( coordinates, itemShadowColor );
 		
-		previusCoordenates = coordenates;
+		previusCoordinates = coordinates;
 		previousLevel = levels[ currentItemPlacingInfo.level.x ][ currentItemPlacingInfo.level.y ];
 		previousMap = occupancyMaps[ currentItemPlacingInfo.level.x ][ currentItemPlacingInfo.level.y ];
 	}
@@ -109,13 +109,13 @@
 	function printHoverShapeVisuals(){
 		try{
 				
-			if(GetOccupancyOfShapesEditorCoordenates(_x, _y) == FREE){
+			if(GetOccupancyOfShapesEditorCoordinates(_x, _y) == FREE){
 				let _cell = tableShapes.rows[ _x ].cells[ _y ];
 				if(_cell == null) return;
 				_cell.style.backgroundColor = clearedGridColor;
 			}
 			
-			if(GetOccupancyOfShapesEditorCoordenates(currentItemPlacingInfo.positionX, currentItemPlacingInfo.positionY) == FREE){
+			if(GetOccupancyOfShapesEditorCoordinates(currentItemPlacingInfo.positionX, currentItemPlacingInfo.positionY) == FREE){
 				let cell = tableShapes.rows[ currentItemPlacingInfo.positionX ].cells[ currentItemPlacingInfo.positionY ];
 				if(cell == null) return;
 				cell.style.backgroundColor = itemShadowColor;	
@@ -126,7 +126,7 @@
 		}catch{}
 	}
 	
-	function printVisualsOfCoordenates(shape, color, level){
+	function printVisualsOfCoordinates(shape, color, level){
 		if(shape==null) return;
 
 		if(level == null)
@@ -141,12 +141,12 @@
 		}
 	}
 	
-	function printVisualsOfShapeEditorCoordenates(x, y, color){
+	function printVisualsOfShapeEditorCoordinates(x, y, color){
 		var cell = tableShapes.rows[ x ].cells[ y ];
 		cell.style.backgroundColor = color;	
 	}
 	
-	function printVisualsOfCoordenatesOnTable(shape, color, table){
+	function printVisualsOfCoordinatesOnTable(shape, color, table){
 		if(shape==null) return;
 		for(var i=0; i<shape.x.length; i++){
 			var cell = table.rows[ shape.x[i] ].cells[ shape.y[i] ];

@@ -14,9 +14,9 @@ var isShapeEditorActive = false;
 		}
 
 		function ReturnToMapEditor(){
-			let coordenates = OccupancyMapToCoordenates(shapeMap);
+			let coordinates = OccupancyMapToCoordinates(shapeMap);
 			
-			if( coordenates.x.length == 0){
+			if( coordinates.x.length == 0){
 				//console.log("There's no shape to save, returning..");
 				GoToMapEditor();
 				return;
@@ -33,19 +33,19 @@ var isShapeEditorActive = false;
 			let inputName = document.getElementById('inputName');
 
 			//Format shape
-			let coordenates = OccupancyMapToCoordenates(shapeMap);
+			let coordinates = OccupancyMapToCoordinates(shapeMap);
 			
-			if( coordenates.x.length == 0){
+			if( coordinates.x.length == 0){
 				//console.log("There's no shape to save, returning..");
 				GoToMapEditor();
 				return;
 			}
 			
-			let formatedCoordenates = LocalizeCoordenates(coordenates);
+			let formatedCoordinates = LocalizeCoordinates(coordinates);
 			
 			//Add to registry
-			//console.log(formatedCoordenates);
-			listOfShapes[listOfShapes.length] = formatedCoordenates;
+			//console.log(formatedCoordinates);
+			listOfShapes[listOfShapes.length] = formatedCoordinates;
 			listOfShapeNames[listOfShapeNames.length] = inputName.value;
 			listOfShapeColors[listOfShapeColors.length] = randomColor();
 			
@@ -67,35 +67,35 @@ var isShapeEditorActive = false;
 			x = currentItemPlacingInfo.positionX;
 			y = currentItemPlacingInfo.positionY;
 			
-			if(GetOccupancyOfShapesEditorCoordenates(x, y) == FREE){
+			if(GetOccupancyOfShapesEditorCoordinates(x, y) == FREE){
 				PlaceDotAtPoint(x, y);	
 			}
 			else{
-				printVisualsOfShapeEditorCoordenates(x, y, clearedGridColor);
-				RegisterCoordenatesInShapesMap(x, y, FREE);		
+				printVisualsOfShapeEditorCoordinates(x, y, clearedGridColor);
+				RegisterCoordinatesInShapesMap(x, y, FREE);		
 			}
 		}
 		
 		function PlaceDotAtPoint(x, y){
-			printVisualsOfShapeEditorCoordenates(x, y, itemPlacedColor);
-			RegisterCoordenatesInShapesMap(x, y, OCCUPIED);
+			printVisualsOfShapeEditorCoordinates(x, y, itemPlacedColor);
+			RegisterCoordinatesInShapesMap(x, y, OCCUPIED);
 		}
 
 		function ResetShape(){
 			//console.log("ResetShape stuff happens");
-			let formatedCoordenates = OccupancyMapToCoordenates(shapeMap);
-			for(let i=0; i<formatedCoordenates.x.length; i++){
-				printVisualsOfShapeEditorCoordenates(formatedCoordenates.x[i], formatedCoordenates.y[i], clearedGridColor);
+			let formatedCoordinates = OccupancyMapToCoordinates(shapeMap);
+			for(let i=0; i<formatedCoordinates.x.length; i++){
+				printVisualsOfShapeEditorCoordinates(formatedCoordinates.x[i], formatedCoordinates.y[i], clearedGridColor);
 			}
 			
 			shapeMap = Array(shapesGridSize.x).fill(null).map(()=>Array(shapesGridSize.y).fill(false));
 		}
 
-		function RegisterCoordenatesInShapesMap(x, y, state){
+		function RegisterCoordinatesInShapesMap(x, y, state){
 			shapeMap[x][y] = state;
 		}
 
-		function GetOccupancyOfShapesEditorCoordenates(x, y){
+		function GetOccupancyOfShapesEditorCoordinates(x, y){
 			return shapeMap[x][y];
 		}
 		
@@ -149,7 +149,7 @@ var isShapeEditorActive = false;
 				}
 
 				let history = historyOfPlacements[i];
-				let historyCoordenates = history.coordenates;
+				let historyCoordinates = history.coordinates;
 				
 				//find all matching types
 				if(history.itemType == shapeIndex){
@@ -160,8 +160,8 @@ var isShapeEditorActive = false;
 					let occupancyMap = occupancyMaps[r][c];
 					let level = levels[r][c];
 
-					printVisualsOfCoordenates(historyCoordenates, clearedGridColor, level);
-					UpdateOccupancy(historyCoordenates, FREE, occupancyMap);
+					printVisualsOfCoordinates(historyCoordinates, clearedGridColor, level);
+					UpdateOccupancy(historyCoordinates, FREE, occupancyMap);
 					
 					DeleteFromHistoryOfPlacements( history );
 				}

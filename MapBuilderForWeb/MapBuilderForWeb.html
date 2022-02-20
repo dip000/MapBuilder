@@ -186,7 +186,7 @@
 				//Skip nulled shapes
 				if(listOfShapes[i] == null) continue;
 			
-				let maxValue = GetMaxValueOfCoordenates(listOfShapes[i]);
+				let maxValue = GetMaxValueOfCoordinates(listOfShapes[i]);
 				let marginValue = maxValue + 3;
 				let sizeFactor = fixedSizeOfShape / (cellSize*marginValue);
 				//console.log("maxValue:"+maxValue+"; sizeFactor:"+sizeFactor);
@@ -210,8 +210,8 @@
 				itemsArea.appendChild( item );
 				item.addEventListener('click', function(){ ChangeItem(i); } );
 				
-				let coordenates = GlobalizeCoordenates( listOfShapes[i] , 1, 1);
-				printVisualsOfCoordenatesOnTable(coordenates, listOfShapeColors[i], item);
+				let coordinates = GlobalizeCoordinates( listOfShapes[i] , 1, 1);
+				printVisualsOfCoordinatesOnTable(coordinates, listOfShapeColors[i], item);
 				
 				shapeElements[i] = item;
 			}
@@ -284,8 +284,8 @@
 				for (let c=0; c<occupancyMaps[0].length; c++) {
 					let occupancyMap = occupancyMaps[r][c];
 					let level = levels[r][c];
-					let formatedCoordenates = OccupancyMapToCoordenates(occupancyMap);
-					printVisualsOfCoordenates(formatedCoordenates, clearedGridColor, level);
+					let formatedCoordinates = OccupancyMapToCoordinates(occupancyMap);
+					printVisualsOfCoordinates(formatedCoordinates, clearedGridColor, level);
 
 					occupancyMaps[r][c] = Array(gridSize.x).fill(null).map(()=>Array(gridSize.y).fill(false));
 				}
@@ -350,14 +350,14 @@
 			// 2. Here changes the index-position for the center-volume-position of the object so it visualy rotates from its center
 			// 3. The (rows, columns) system is different from the (x, y) system by 90 degrees or (-y, x)
 			// 4. We need to register the index position as it was taken by a (x,y) system, so it changes again the index-position-row-col to index-position-xy
-			// 5. Summary; internally we're using (row,col) as original detection of coordenates. Volume-center to place the visuals. And standar (x,y) as output
+			// 5. Summary; internally we're using (row,col) as original detection of coordinates. Volume-center to place the visuals. And standar (x,y) as output
 
 			//Creates an object {[x],[y]} where x and y are integrers
 			let clickedCoordenate = new Vector2Array(currentItemPlacingInfo.positionX, currentItemPlacingInfo.positionY);
 
 			//Finds info 
 			let shape = listOfShapes[currentItemPlacingInfo.itemType];
-			let shapeRotated = RotateCoordenatesByAngle(shape, currentItemPlacingInfo.rotation);
+			let shapeRotated = RotateCoordinatesByAngle(shape, currentItemPlacingInfo.rotation);
 			
 			//Reformat to volume average
 			let averageVolume = AverageVolume(shapeRotated);
@@ -365,8 +365,8 @@
 			let volumeIndex = { x:(currentItemPlacingInfo.positionX-roundedAverageVolume.x), y:(currentItemPlacingInfo.positionY - roundedAverageVolume.y) };
 
 			//make info
-			let coordenates = GlobalizeCoordenates(shapeRotated, volumeIndex.x, volumeIndex.y);
-			currentItemPlacingInfo.coordenates = coordenates;
+			let coordinates = GlobalizeCoordinates(shapeRotated, volumeIndex.x, volumeIndex.y);
+			currentItemPlacingInfo.coordinates = coordinates;
 		}
 		
 		function RemoveCurrentItemInfo(){
@@ -376,14 +376,14 @@
 			//console.log(new ItemPlacingInfo(infoToRemove));
 			
 			DeleteFromHistoryOfPlacements(infoToRemove);
-			printVisualsOfCoordenates(infoToRemove.coordenates, clearedGridColor);
-			UpdateOccupancy(infoToRemove.coordenates, FREE);
+			printVisualsOfCoordinates(infoToRemove.coordinates, clearedGridColor);
+			UpdateOccupancy(infoToRemove.coordinates, FREE);
 			printHoverVisuals();
 		}
 		
 		function PlaceCurrentItemInfo(){
 			//Standar (x,y) system for ouputting
-			let minValues = GetMinValuesOfCoordenates(currentItemPlacingInfo.coordenates);
+			let minValues = GetMinValuesOfCoordinates(currentItemPlacingInfo.coordinates);
 			
 			currentItemPlacingInfo.x = currentItemPlacingInfo.positionX;
 			currentItemPlacingInfo.y = currentItemPlacingInfo.positionY;
@@ -394,8 +394,8 @@
 			//console.log("infoToPlace: ");
 			//console.log(new ItemPlacingInfo(currentItemPlacingInfo));
 
-			printVisualsOfCoordenates(currentItemPlacingInfo.coordenates, listOfShapeColors[currentItemPlacingInfo.itemType]);
-			UpdateOccupancy(currentItemPlacingInfo.coordenates, OCCUPIED);
+			printVisualsOfCoordinates(currentItemPlacingInfo.coordinates, listOfShapeColors[currentItemPlacingInfo.itemType]);
+			UpdateOccupancy(currentItemPlacingInfo.coordinates, OCCUPIED);
 			RegisterHistoryOfPlacements(currentItemPlacingInfo);
 		
 		}

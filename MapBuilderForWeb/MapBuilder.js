@@ -1,13 +1,13 @@
 
-        var shapeCoordenates = [];
-        function RegisterCoordenatesInMap(x, y){
+        var shapeCoordinates = [];
+        function RegisterCoordinatesInMap(x, y){
             if(isPrintAction){
-                shapeCoordenates[x+","+y] = {x,y};
+                shapeCoordinates[x+","+y] = {x,y};
             }
             else{
-                delete shapeCoordenates[x+","+y]; 
+                delete shapeCoordinates[x+","+y]; 
             }
-            //console.log(shapeCoordenates);
+            //console.log(shapeCoordinates);
         }
 
   
@@ -24,8 +24,8 @@
 			
 			let occupancyMap = occupancyMaps[currentItemPlacingInfo.level.x][currentItemPlacingInfo.level.y];
 
-			let x = currentItemPlacingInfo.coordenates.x;
-			let y = currentItemPlacingInfo.coordenates.y;
+			let x = currentItemPlacingInfo.coordinates.x;
+			let y = currentItemPlacingInfo.coordinates.y;
 
 			try{
 				let state = ( occupancyMap[ currentItemPlacingInfo.positionX ][ currentItemPlacingInfo.positionY ] );
@@ -55,13 +55,13 @@
 		
 
 		
-		function UpdateOccupancy(coordenates, state, map){
+		function UpdateOccupancy(coordinates, state, map){
 			let occupancyMap = map;
 			if( occupancyMap == null )
 				occupancyMap = occupancyMaps[currentItemPlacingInfo.level.x][currentItemPlacingInfo.level.y];
 			
-			for(var i=0; i<coordenates.x.length; i++){
-				occupancyMap[coordenates.x[i]][coordenates.y[i]] = state;
+			for(var i=0; i<coordinates.x.length; i++){
+				occupancyMap[coordinates.x[i]][coordinates.y[i]] = state;
 			}		
 		}
 		
@@ -92,7 +92,7 @@
 				}
 				
 				let history = historyOfPlacements[i];
-				let historyCoordenates = history.coordenates;
+				let historyCoordinates = history.coordinates;
 				
 				//Skip placement if it happened in a different level
 				let differentLevelX = (history.level.x != currentItemPlacingInfo.level.x);
@@ -101,9 +101,9 @@
 					continue;
 				}
 				
-				for(var j=0; j<historyCoordenates.x.length; j++){
-					let sameCoordenateX = (historyCoordenates.x[j] == currentItemPlacingInfo.positionX);
-					let sameCoordenateY = (historyCoordenates.y[j] == currentItemPlacingInfo.positionY);
+				for(var j=0; j<historyCoordinates.x.length; j++){
+					let sameCoordenateX = (historyCoordinates.x[j] == currentItemPlacingInfo.positionX);
+					let sameCoordenateY = (historyCoordinates.y[j] == currentItemPlacingInfo.positionY);
 					if(sameCoordenateX && sameCoordenateY){
 						return historyOfPlacements[i];
 					}
@@ -120,11 +120,11 @@
 				if(historyOfPlacements[i].deleted == true){
 					continue;
 				}
-				let historyCoordenates = historyOfPlacements[i].coordenates;
+				let historyCoordinates = historyOfPlacements[i].coordinates;
 				
-				for(var j=0; j<historyCoordenates.x.length; j++){
-					let sameCoordenateX = (historyCoordenates.x[j] == point.x);
-					let sameCoordenateY = (historyCoordenates.y[j] == point.y);
+				for(var j=0; j<historyCoordinates.x.length; j++){
+					let sameCoordenateX = (historyCoordinates.x[j] == point.x);
+					let sameCoordenateY = (historyCoordinates.y[j] == point.y);
 					
 					if(sameCoordenateX && sameCoordenateY){
 						return historyOfPlacements[i];
@@ -137,46 +137,46 @@
 
 
 
-		function IgnoreOccupiedCoordenates(coordenates, map){
-			if(coordenates == null) return null;
+		function IgnoreOccupiedCoordinates(coordinates, map){
+			if(coordinates == null) return null;
 			
-			newCoordenates = new Vector2Array();
+			newCoordinates = new Vector2Array();
 			let j=0;
 			
 			let occupancyMap = map;
 			if( occupancyMap == null )
 				occupancyMap = occupancyMaps[currentItemPlacingInfo.level.x][currentItemPlacingInfo.level.y];
 			
-			for(let i=0; i<coordenates.x.length; i++){
+			for(let i=0; i<coordinates.x.length; i++){
 				
 				try{
-					if(occupancyMap[coordenates.x[i]][coordenates.y[i]] == FREE){
-						newCoordenates.x[j] = coordenates.x[i];
-						newCoordenates.y[j] = coordenates.y[i];
+					if(occupancyMap[coordinates.x[i]][coordinates.y[i]] == FREE){
+						newCoordinates.x[j] = coordinates.x[i];
+						newCoordinates.y[j] = coordinates.y[i];
 						j++;
 					}
 				} catch{}
 			}
 			
-			//console.log(newCoordenates);
-			return newCoordenates;
+			//console.log(newCoordinates);
+			return newCoordinates;
 		}
 	
 //REFORMAT AND OUTPUT ///////////////////////////////////////////////////
 
 		
-		function formatCoordenates(){
+		function formatCoordinates(){
 			
 			let outputData = new OutputData();
 			outputData.generateFromHistory();
 			outputData.generateFromMap(occupancyMaps[currentItemPlacingInfo.level.x][currentItemPlacingInfo.level.y]);
 		
-			let formatedCoordenates = new Vector2Array(outputData.positionsX, outputData.positionsY);
-			formatedCoordenates = LocalizeCoordenates(formatedCoordenates);
-			formatedCoordenates = RotateCoordenates90Clockwise(formatedCoordenates);
+			let formatedCoordinates = new Vector2Array(outputData.positionsX, outputData.positionsY);
+			formatedCoordinates = LocalizeCoordinates(formatedCoordinates);
+			formatedCoordinates = RotateCoordinates90Clockwise(formatedCoordinates);
 			
-			outputData.positionsX = formatedCoordenates.x;
-			outputData.positionsY = formatedCoordenates.y;
+			outputData.positionsX = formatedCoordinates.x;
+			outputData.positionsY = formatedCoordinates.y;
 			
 			return outputData;
 		}
@@ -184,12 +184,12 @@
 		function formatShapes(){
 			let output = "";
 			for( let i=0; i<listOfShapes.length; i++){
-				let shapeFormated = RotateCoordenatesByAngle( listOfShapes[i], -90 );
+				let shapeFormated = RotateCoordinatesByAngle( listOfShapes[i], -90 );
 				
 				let outputShape = {
 					itemName : listOfShapeNames[i],
-					localCoordenatesX : shapeFormated.x,
-					localCoordenatesY : shapeFormated.y
+					localCoordinatesX : shapeFormated.x,
+					localCoordinatesY : shapeFormated.y
 				};
 				output += JSON.stringify(outputShape);
 				
@@ -290,7 +290,7 @@ function Vector2Array(x, y) {
 	}
 }
 
-function ItemPlacingInfo(itemType, rotation, positionX, positionY, coordenates, level){
+function ItemPlacingInfo(itemType, rotation, positionX, positionY, coordinates, level){
 
 	if(itemType instanceof ItemPlacingInfo){
 		let instance = JSON.parse(JSON.stringify(itemType));
@@ -298,7 +298,7 @@ function ItemPlacingInfo(itemType, rotation, positionX, positionY, coordenates, 
 		this.rotation  = instance.rotation;
 		this.positionX = instance.positionX;
 		this.positionY = instance.positionY;
-		this.coordenates = instance.coordenates;
+		this.coordinates = instance.coordinates;
 		this.indexInHistory = instance.indexInHistory;
 		this.deleted = instance.deleted;
 		this.level = instance.level;
@@ -308,7 +308,7 @@ function ItemPlacingInfo(itemType, rotation, positionX, positionY, coordenates, 
 		this.rotation  = 0;
 		this.positionX = 0;
 		this.positionY = 0;
-		this.coordenates = new Vector2Array();
+		this.coordinates = new Vector2Array();
 		this.level = new Point();
 	
 		//Internal properties
@@ -320,7 +320,7 @@ function ItemPlacingInfo(itemType, rotation, positionX, positionY, coordenates, 
 		this.rotation  = rotation;
 		this.positionX = positionX;
 		this.positionY = positionY;
-		this.coordenates = coordenates;
+		this.coordinates = coordinates;
 		this.level = level;
 		
 		//Internal properties
@@ -429,8 +429,8 @@ function Point(x, y){
 		for(let i=0; i<shapesString.length; i++){
 			shapes[i] = JSON.parse(shapesString[i]);
 
-			let shape = new Vector2Array(shapes[i].localCoordenatesX, shapes[i].localCoordenatesY);
-			let shapeRotated = RotateCoordenatesByAngle( shape, 90 );
+			let shape = new Vector2Array(shapes[i].localCoordinatesX, shapes[i].localCoordinatesY);
+			let shapeRotated = RotateCoordinatesByAngle( shape, 90 );
 
 			listOfShapes[i] = shapeRotated;
 			listOfShapeNames[i] = shapes[i].itemName;
@@ -486,19 +486,19 @@ function Point(x, y){
 
 			let itemType = maps.itemTypes[i];
 			let itemShape = listOfShapes[itemType];
-			let shapeRotated = RotateCoordenatesByAngle(itemShape, currentItemPlacingInfo.rotation);
+			let shapeRotated = RotateCoordinatesByAngle(itemShape, currentItemPlacingInfo.rotation);
 
 			//Performs a global rotation. Switches axis and mirrors Y
 			currentItemPlacingInfo.positionX = (maps.mapSizeY-1) - maps.positionsY[i] + placementOffset.x;
 			currentItemPlacingInfo.positionY = maps.positionsX[i] + placementOffset.y;
 
-			let pivot = GetMinValuesOfCoordenates(shapeRotated);
-			let coordenates = GlobalizeCoordenates(shapeRotated, currentItemPlacingInfo.positionX - pivot.x, currentItemPlacingInfo.positionY - pivot.y);
-			currentItemPlacingInfo.coordenates = coordenates;
+			let pivot = GetMinValuesOfCoordinates(shapeRotated);
+			let coordinates = GlobalizeCoordinates(shapeRotated, currentItemPlacingInfo.positionX - pivot.x, currentItemPlacingInfo.positionY - pivot.y);
+			currentItemPlacingInfo.coordinates = coordinates;
 
 			//console.log( new ItemPlacingInfo(currentItemPlacingInfo) )
-			printVisualsOfCoordenates(coordenates, listOfShapeColors[ maps.itemTypes[i] ]);
-			UpdateOccupancy(coordenates, OCCUPIED);
+			printVisualsOfCoordinates(coordinates, listOfShapeColors[ maps.itemTypes[i] ]);
+			UpdateOccupancy(coordinates, OCCUPIED);
 			RegisterHistoryOfPlacements(currentItemPlacingInfo);
 		}
 	}

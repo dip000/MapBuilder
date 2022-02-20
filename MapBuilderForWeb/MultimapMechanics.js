@@ -45,11 +45,11 @@
 		/*for(let r=0; r<occupancyMaps.length; r++){
 			for(let c=0; c<occupancyMaps[0].length; c++){
 				
-				let coordenates = OccupancyMapToCoordenates(occupancyMaps[r][c]);
-				if( coordenates == null)
+				let coordinates = OccupancyMapToCoordinates(occupancyMaps[r][c]);
+				if( coordinates == null)
 					continue;
 				
-				if( coordenates.x.length != 0 && (confirm(message + " Requires a reset. Continue?") == false) ){
+				if( coordinates.x.length != 0 && (confirm(message + " Requires a reset. Continue?") == false) ){
 					return DONT_RESET;
 				}
 			}
@@ -106,7 +106,7 @@
 		
 		//return outputData;
 		
-		//Format coordenates and stringify each level
+		//Format coordinates and stringify each level
 		let outString = "";
 		for(var r=0; r<gridRows; r++){
 			for(var c=0; c<gridCols; c++){
@@ -114,22 +114,22 @@
 				//Skip empty maps
 				if(outputData[r] == null) continue;
 				
-				//Coordenates are not formated, so extract, reformat and reassign
-				let formatedCoordenates = new Vector2Array( outputData[r][c].positionsX, outputData[r][c].positionsY );
+				//Coordinates are not formated, so extract, reformat and reassign
+				let formatedCoordinates = new Vector2Array( outputData[r][c].positionsX, outputData[r][c].positionsY );
 				
-				//Localized coordenates are just the minimum size in which the whole level fits
-				let rotatedCoordenates;
+				//Localized coordinates are just the minimum size in which the whole level fits
+				let rotatedCoordinates;
 				let residueData;
 				if(localize){
 					residueData = outputData[r][c].generateFromMap( occupancyMaps[r][c] );
 					
 					//Rotates in local space
-					rotatedCoordenates = LocalizeCoordenates(formatedCoordenates);
-					rotatedCoordenates = RotateCoordenates90Clockwise(rotatedCoordenates);
+					rotatedCoordinates = LocalizeCoordinates(formatedCoordinates);
+					rotatedCoordinates = RotateCoordinates90Clockwise(rotatedCoordinates);
 				}
 				else{
 					//Switch axis from (rwo,col) to (x,y). To rotate all points in a fixed area is needed a reference to the highest point in rows axis, which is size-1
-					rotatedCoordenates = RotatePerfect( formatedCoordenates, gridSize.x-1 );
+					rotatedCoordinates = RotatePerfect( formatedCoordinates, gridSize.x-1 );
 					
 					//Switched map dimentions to match with the (x,y) system
 					outputData[r][c].mapSizeX = gridSize.y;
@@ -143,13 +143,12 @@
 				outputData[r][c].parseInfo.rows = gridRows;
 				outputData[r][c].parseInfo.cols = gridCols;
 
-				//Coordenates are formated and sent back to output data
-				outputData[r][c].positionsX = rotatedCoordenates.x;
-				outputData[r][c].positionsY = rotatedCoordenates.y;
-
+				//Coordinates are formated and sent back to output data
+				outputData[r][c].positionsX = rotatedCoordinates.x;
+				outputData[r][c].positionsY = rotatedCoordinates.y;
 
 				//Map name is its position
-				outputData[r][c].mapName = "Level " + r + ", " + c;
+				outputData[r][c].mapName = "Level " + c + "," + (gridRows-r-1);
 
 				//string output and add the separator character
 				outString += JSON.stringify( outputData[r][c] );
