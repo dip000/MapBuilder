@@ -112,8 +112,16 @@
 			for(var c=0; c<gridCols; c++){
 				
 				//Skip empty maps
-				if(outputData[r] == null) continue;
+				//if(outputData[r] == null) continue;
 				
+				//Create empty maps
+				if(outputData[r] == null){
+					outputData[r] = new Array();
+				}
+				if(outputData[r][c] == null){
+					outputData[r][c] = new OutputData();
+				}
+
 				//Coordinates are not formated, so extract, reformat and reassign
 				let formatedCoordinates = new Vector2Array( outputData[r][c].positionsX, outputData[r][c].positionsY );
 				
